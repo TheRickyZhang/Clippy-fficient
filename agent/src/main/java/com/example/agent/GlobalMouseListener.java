@@ -1,5 +1,5 @@
 // agent/src/main/java/com/example/agent/listener/GlobalMouseListener.java
-package com.example.agent.listener;
+package com.example.agent;
 
 import com.example.core.events.InputEvent;
 import com.example.core.events.MouseButton;

@@ -1,0 +1,92 @@
+package com.example.ui.controllers;
+
+import com.example.core.ShortcutEngine;
+import com.example.core.sequence.InputSequence;
+import com.example.ui.app.AppController;
+import com.example.ui.app.Suggestion;
+import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.collections.FXCollections;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+
+import java.util.Optional;
+
+public class SuggestionsController {
+    @FXML private TableView<Suggestion> suggestionTable;
+    @FXML private TableColumn<Suggestion,String> patternCol;
+    @FXML private TableColumn<Suggestion,String> tipCol;
+    @FXML private TableColumn<Suggestion,Void> actionCol;
+    @FXML private TextArea logArea;
+
+    private AppController  app;
+    private ShortcutEngine engine;
+
+    public void setAppController(AppController app) {
+        this.app    = app;
+        this.engine = app.getEngine();
+    }
+
+    @FXML
+    public void initialize() {
+        suggestionTable.setItems(FXCollections.observableArrayList());
+        suggestionTable.setEditable(true);
+
+        patternCol.setCellValueFactory(c ->
+                new ReadOnlyStringWrapper(c.getValue().getPattern().toString())
+        );
+        tipCol.setCellValueFactory(c ->
+                c.getValue().tipProperty()
+        );
+        tipCol.setOnEditCommit(e ->
+                e.getRowValue().setTip(e.getNewValue())
+        );
+
+        actionCol.setCellFactory(col -> new TableCell<>() {
+            private final Button btn = new Button("Delete");
+            {
+                btn.setOnAction(evt -> {
+                    Suggestion s = getTableView().getItems().get(getIndex());
+                    InputSequence seq = s.getPattern();
+                    engine.removeAction(seq);
+                    engine.removeTip(seq);
+                    getTableView().getItems().remove(s);
+                });
+            }
+            @Override
+            protected void updateItem(Void v, boolean empty) {
+                super.updateItem(v, empty);
+                setGraphic(empty ? null : btn);
+            }
+        });
+    }
+
+    @FXML
+    private void onAddHintClicked() {
+        TextInputDialog patDlg = new TextInputDialog();
+        patDlg.setTitle("New Shortcut Pattern");
+        patDlg.setHeaderText("Enter pattern (e.g. scroll>click>type):");
+        Optional<String> pat = patDlg.showAndWait();
+        pat.ifPresent(desc -> {
+            TextInputDialog hintDlg = new TextInputDialog();
+            hintDlg.setTitle("New Tip Text");
+            hintDlg.setHeaderText("Enter the tip to display:");
+            Optional<String> tip = hintDlg.showAndWait();
+            tip.ifPresent(text -> {
+                InputSequence seq = new InputSequence(desc);
+                engine.addTip(seq, text);
+                engine.addAction(seq, () -> appendLog("tip: " + text));
+                suggestionTable.getItems().add(new Suggestion(seq, text));
+            });
+        });
+    }
+
+    @FXML
+    private void onShowReferences() {
+        app.showReferences();
+    }
+
+    public void appendLog(String line) {
+        Platform.runLater(() -> logArea.appendText(line + "\n"));
+    }
+}

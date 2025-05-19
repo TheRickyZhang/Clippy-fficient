@@ -6,26 +6,16 @@ import javafx.beans.property.StringProperty;
 
 public class Suggestion {
     private final InputSequence pattern;
-    private final StringProperty hint = new SimpleStringProperty(this, "hint", "");
+    private final StringProperty tip = new SimpleStringProperty(this, "tip", "");
 
-    public Suggestion (InputSequence pattern, String hint) {
+    public Suggestion(InputSequence pattern, String tip) {
         this.pattern = pattern;
-        this.hint.set(hint);
+        this.tip.set(tip);
     }
 
-    public InputSequence getPattern() {
-        return pattern;
-    }
+    public InputSequence getPattern() { return pattern; }
 
-    public StringProperty hintProperty() {
-        return hint;
-    }
-
-    public String getHint() {
-        return hint.get();
-    }
-
-    public void setHint(String hint) {
-        this.hint.set(hint);
-    }
+    public StringProperty tipProperty() { return tip; }
+    public String getTip()             { return tip.get(); }
+    public void setTip(String tip)     { this.tip.set(tip); }
 }

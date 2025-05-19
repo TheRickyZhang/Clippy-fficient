@@ -1,4 +1,4 @@
-package com.example.agent.listener;
+package com.example.agent;
 
 import com.example.core.events.InputEvent;
 import com.github.kwhat.jnativehook.GlobalScreen;

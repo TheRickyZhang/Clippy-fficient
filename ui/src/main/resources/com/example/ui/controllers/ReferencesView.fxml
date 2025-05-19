@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.ui.controllers.ReferencesController">
+
+    <top>
+        <ToolBar>
+            <Button text="← Back" onAction="#onBack"/>
+        </ToolBar>
+    </top>
+
+    <center>
+        <ListView fx:id="tokenList"
+                  prefWidth="300" prefHeight="400"/>
+    </center>
+</BorderPane>

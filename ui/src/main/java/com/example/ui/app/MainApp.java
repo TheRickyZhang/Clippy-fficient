@@ -1,50 +1,58 @@
 package com.example.ui.app;
 
+import com.example.agent.GlobalHookService;
+import com.example.core.ShortcutEngine;
+import com.example.core.context.ApplicationContext;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
-// Entry point of the entire app
 public class MainApp extends Application {
     @Override
-    public void init() {
-
-    }
-
-    @Override
     public void start(Stage stage) throws Exception {
-        // Entry point for the UI
-        String fxmlPath = "/com/example/ui/app/main.fxml";
-        URL fxmlUrl = getClass().getResource(fxmlPath);
-        if(fxmlUrl == null) {
-            throw new IllegalStateException("Cannot find FXML resource at " + fxmlPath);
+        ApplicationContext ctx    = new ApplicationContext(List.of());
+        ShortcutEngine    engine = new ShortcutEngine();
+        GlobalHookService.start(engine::onEvent);
+
+        URL fxmlUrl = getClass().getResource("/com/example/ui/app/AppView.fxml");
+        System.out.println("Loading FXML from: " + fxmlUrl);
+        if (fxmlUrl == null) {
+            throw new IllegalStateException("Couldn’t find AppView.fxml on the classpath!");
         }
-
-        // Calls all the FXML methods and loads the root of the scene graph
         FXMLLoader loader = new FXMLLoader(fxmlUrl);
-        Parent root = loader.load();
 
-        // Our own app-specific initialization based on the FXML instance
-        AppController app = new AppController(loader.getController());
-        app.initialize();
+
+        loader.setControllerFactory(type -> {
+            if (type == AppController.class) {
+                return new AppController(engine);
+            }
+            try {
+                return type.getDeclaredConstructor().newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        Parent root;
+        try {
+            root = loader.load();
+            System.out.println("FXML loaded, controller = " + loader.getController());
+        } catch (IOException e) {
+            System.err.println("Error loading FXML: " + e.getMessage());
+            throw e;
+        }
 
         stage.setScene(new Scene(root, 700, 500));
         stage.setTitle("Shortcut Reinforcement Agent");
         stage.show();
-        System.out.println("done with start");
-    }
-
-    @Override
-    public void stop() {
-
     }
 
     public static void main(String[] args) {
-        // Calls init() then start()
         launch(args);
     }
 }

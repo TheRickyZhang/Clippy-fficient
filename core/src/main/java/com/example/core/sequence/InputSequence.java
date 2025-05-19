@@ -8,12 +8,9 @@ import java.util.function.Predicate;
 
 public class InputSequence {
     private final List<Predicate<InputEvent>> steps;
-    public InputSequence(List<Predicate<InputEvent>> steps) {
-        this.steps = steps;
-    }
-
-    /** Single unified token → predicate map */
+    private final List<String> tokens;
     private static final Map<String, Predicate<InputEvent>> TOKEN_MAP;
+
     static {
         var m = new HashMap<String, Predicate<InputEvent>>();
 
@@ -39,7 +36,32 @@ public class InputSequence {
         m.put("SCROLL_DOWN",e -> e instanceof MouseWheelEvent mw && mw.scrollDelta()>0);
 
         TOKEN_MAP = Map.copyOf(m);
+        System.out.println("Token map" + TOKEN_MAP);
     }
+
+    public InputSequence(String raw) {
+        this.tokens = Arrays.stream(raw.split(">"))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
+        this.steps = tokens.stream().map(s -> {
+            var token = TOKEN_MAP.get(s);
+            if(token == null) {
+                throw new IllegalArgumentException("");
+            }
+            return token;
+        }).toList();
+    }
+
+
+    public static List<String> getTokens() {
+        return new ArrayList<>(TOKEN_MAP.keySet());
+    }
+
+    public String toString() {
+        return String.join(" > ", tokens);
+    }
+
 
 
     public boolean matches(Deque<InputEvent> buf) {
@@ -53,17 +75,4 @@ public class InputSequence {
         return true;
     }
 
-    public static InputSequence literal(String raw) {
-        var tokens = raw.split(">");
-        var preds = Arrays.stream(tokens)
-                .map(String::trim)
-                .map(t -> {
-                    var p = TOKEN_MAP.get(t.toUpperCase());
-                    if (p == null)
-                        throw new IllegalArgumentException("Unknown token: " + t);
-                    return p;
-                })
-                .toList();
-        return new InputSequence(preds);
-    }
 }

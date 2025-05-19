@@ -1,73 +1,75 @@
 package com.example.ui.app;
 
-import com.example.agent.listener.GlobalHookService;
 import com.example.core.ShortcutEngine;
-import com.example.core.context.ApplicationContext;
-import com.example.core.sequence.InputSequence;
+import com.example.ui.controllers.ReferencesController;
+import com.example.ui.controllers.SuggestionsController;
 import javafx.application.Platform;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.Alert;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.layout.BorderPane;
 
-import java.util.Optional;
+import java.io.IOException;
+import java.net.URL;
+import java.util.function.Consumer;
 
 public class AppController {
-    private final ShortcutEngine engine = new ShortcutEngine();
-    private final UIController ui;
+    @FXML private BorderPane rootView;
+    private final ShortcutEngine engine;
 
-    public AppController(UIController ui) {
-        this.ui = ui;
-        this.ui.setAppController(this);
-        System.out.println("App controller initialized");
+    public AppController(ShortcutEngine engine) {
+        this.engine = engine;
     }
 
-    public void initialize() {
-        // engine.initDefaults();
+    @FXML public void initialize() {
+        showMainView();
+    }
+
+    public void showMainView() {
+        loadCenter(
+                "/com/example/ui/controllers/SuggestionsView.fxml",
+                SuggestionsController.class,
+                ctrl -> ctrl.setAppController(this)
+        );
+    }
+
+    public void showReferences() {
+        loadCenter(
+                "/com/example/ui/controllers/ReferencesView.fxml",
+                ReferencesController.class,
+                ctrl -> ctrl.setAppController(this)
+        );
+    }
+
+    private <T> void loadCenter(String fxmlPath,
+                                Class<T> controllerType,
+                                Consumer<T> init)
+    {
         try {
-            GlobalHookService.start(engine::onEvent,);
-        } catch (RuntimeException ex) {
-            System.err.println("Cannot start GlobalHookService");
-            ex.printStackTrace();
-            Platform.runLater(() -> {
-                new Alert(Alert.AlertType.ERROR,
-                        "Failed to start global hook: " + ex.getCause().getMessage())
-                        .showAndWait();
-                Platform.exit();
-            });
+            URL url = getClass().getResource(fxmlPath);
+            System.out.println("Loading FXML at path: " + fxmlPath + " → URL: " + url);
+            if (url == null) {
+                throw new IllegalStateException("FXML not found at: " + fxmlPath);
+            }
+            FXMLLoader loader = new FXMLLoader(url);
+            Parent view = loader.load();
+
+            T ctrl = controllerType.cast(loader.getController());
+            init.accept(ctrl);
+            rootView.setCenter(view);
+        } catch (IOException e) {
+            System.err.println("Failed to load " + fxmlPath);
+            e.printStackTrace();
+            Platform.runLater(() ->
+                    new Alert(Alert.AlertType.ERROR,
+                            "Could not load view: " + fxmlPath)
+                            .showAndWait()
+            );
         }
     }
 
-    public void showAddDialog(TableView<Suggestion> table) {
-        TextInputDialog patDlg = new TextInputDialog();
-        patDlg.setTitle("New Shortcut Pattern");
-        patDlg.setHeaderText("Enter your pattern (e.g. scroll→click→type):");
-        patDlg.setContentText("Pattern:");
-        Optional<String> pat = patDlg.showAndWait();
-
-        pat.ifPresent(desc -> {
-            // 2) Prompt for the hint text
-            TextInputDialog hintDlg = new TextInputDialog();
-            hintDlg.setTitle("New Hint Text");
-            hintDlg.setHeaderText("Enter the hint to display when that pattern is seen:");
-            hintDlg.setContentText("Hint:");
-            Optional<String> hint = hintDlg.showAndWait();
-
-            hint.ifPresent(text -> {
-                // 3) Build a SequencePattern from the user’s string
-                InputSequence custom = InputSequence.literal(desc);
-
-                // 4) Update your global data & your engine
-                HintRegistry.addCustom(custom, text);
-                engine.addPattern(custom, () -> ui.appendLog("Hint: " + text));
-
-                // 5) Update the table in the UI
-                table.getItems().add(new Suggestion(custom, text));
-            });
-        });
-    }
-
-    public void removePattern(InputSequence p) {
-        HintRegistry.remove(p);
-        engine.removePattern(p);
+    public ShortcutEngine getEngine() {
+        return engine;
     }
 }
