@@ -18,8 +18,8 @@ public class GlobalMouseWheelListener implements NativeMouseWheelListener {
     @Override
     public void nativeMouseWheelMoved(NativeMouseWheelEvent e) {
         handler.accept(new MouseWheelEvent(
-                e.getWheelRotation(),
-                e.getScrollAmount(),
+                // TO LOOK: Encoding the direction and magnitude together
+                e.getWheelRotation() * e.getScrollAmount(),
                 System.currentTimeMillis()
         ));
     }

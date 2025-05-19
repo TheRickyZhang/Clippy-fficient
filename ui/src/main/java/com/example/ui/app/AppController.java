@@ -1,9 +1,9 @@
 package com.example.ui.app;
 
 import com.example.agent.listener.GlobalHookService;
-import com.example.core.ShortcutRegistry;
-import com.example.core.SuggestionRegistry;
-import com.example.core.sequence.SequencePattern;
+import com.example.core.ShortcutEngine;
+import com.example.core.context.ApplicationContext;
+import com.example.core.sequence.InputSequence;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableView;
@@ -12,22 +12,19 @@ import javafx.scene.control.TextInputDialog;
 import java.util.Optional;
 
 public class AppController {
-    private final ShortcutRegistry engine = new ShortcutRegistry();
+    private final ShortcutEngine engine = new ShortcutEngine();
     private final UIController ui;
 
     public AppController(UIController ui) {
         this.ui = ui;
         this.ui.setAppController(this);
-        System.out.println("HERE");
+        System.out.println("App controller initialized");
     }
 
     public void initialize() {
-        SuggestionRegistry.initDefaults();
-        SuggestionRegistry.all().forEach((p, h) ->
-                engine.addPattern(p, () -> ui.appendLog("Hint: " + h))
-        );
+        // engine.initDefaults();
         try {
-            GlobalHookService.start(engine::onEvent);
+            GlobalHookService.start(engine::onEvent,);
         } catch (RuntimeException ex) {
             System.err.println("Cannot start GlobalHookService");
             ex.printStackTrace();
@@ -57,10 +54,10 @@ public class AppController {
 
             hint.ifPresent(text -> {
                 // 3) Build a SequencePattern from the user’s string
-                SequencePattern custom = SequencePattern.literal(desc);
+                InputSequence custom = InputSequence.literal(desc);
 
                 // 4) Update your global data & your engine
-                SuggestionRegistry.addCustom(custom, text);
+                HintRegistry.addCustom(custom, text);
                 engine.addPattern(custom, () -> ui.appendLog("Hint: " + text));
 
                 // 5) Update the table in the UI
@@ -69,8 +66,8 @@ public class AppController {
         });
     }
 
-    public void removePattern(SequencePattern p) {
-        SuggestionRegistry.remove(p);
+    public void removePattern(InputSequence p) {
+        HintRegistry.remove(p);
         engine.removePattern(p);
     }
 }

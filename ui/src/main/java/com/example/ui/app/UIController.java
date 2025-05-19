@@ -1,13 +1,12 @@
 package com.example.ui.app;
 
-import com.example.core.SuggestionRegistry;
+import com.example.core.HintRegistry;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 
 public class UIController {
     @FXML private TableView<Suggestion> suggestionTable;
@@ -27,14 +26,23 @@ public class UIController {
     public void initialize() {
         // Populate table
         ObservableList<Suggestion> items = FXCollections.observableArrayList();
-        SuggestionRegistry.all().forEach((p, h) -> items.add(new Suggestion(p, h)));
+        HintRegistry.all().forEach((p, h) -> items.add(new Suggestion(p, h)));
         suggestionTable.setItems(items);
+
+        // Ensure the user can edit the table
+        suggestionTable.setEditable(true);
 
         // Configure columns
         patternCol.setCellValueFactory(cell ->
-                new ReadOnlyStringWrapper(cell.getValue().pattern().toString())
+                new ReadOnlyStringWrapper(cell.getValue().getPattern().toString())
         );
-        hintCol.setCellValueFactory(new PropertyValueFactory<>("hint"));
+
+        // This should do the same as PropertyValueFactory, just more explicit
+        hintCol.setCellValueFactory(cellData -> cellData.getValue().hintProperty());
+//        hintCol.setCellValueFactory(new PropertyValueFactory<>("hint"));
+        hintCol.setOnEditCommit(event -> {
+            event.getRowValue().setHint(event.getNewValue());
+        });
 
         // Action column
         actionCol.setCellFactory(col -> new TableCell<>() {
@@ -42,7 +50,7 @@ public class UIController {
             {
                 btn.setOnAction(evt -> {
                     Suggestion s = getTableView().getItems().get(getIndex());
-                    app.removePattern(s.pattern());
+                    app.removePattern(s.getPattern());
                     getTableView().getItems().remove(s);
                 });
             }

@@ -1,3 +1,5 @@
+// com/example/core/events/MouseWheelEvent.java
 package com.example.core.events;
 
-public record MouseWheelEvent(int rotation, int amount, long timestamp) implements InputEvent { }
+public record MouseWheelEvent(int scrollDelta, long timestamp) implements InputEvent {
+}

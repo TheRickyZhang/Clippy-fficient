@@ -2,8 +2,10 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<!--UIController supplies fx:id fields and onAction methods-->
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.ui.app.UIController">
     <top>
+        <!--"suggestionTable is a matching field in our UIController!-->
         <TableView fx:id="suggestionTable">
             <columns>
                 <TableColumn text="Pattern" fx:id="patternCol"/>
@@ -17,6 +19,7 @@
     </center>
     <bottom>
         <HBox spacing="8" style="-fx-padding: 8;">
+            <!--Find method onAddHintClicked-->
             <Button text="Add Hint..." onAction="#onAddHintClicked" />
         </HBox>
     </bottom>
