@@ -6,15 +6,11 @@ import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyListener;
 
 import java.lang.reflect.Field;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 // See: https://github.com/kwhat/jnativehook/blob/2.2/doc/ConsumingEvents.md
 
 public class ConsumeEvent implements NativeKeyListener {
     public ConsumeEvent() throws NativeHookException {
-        Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
-        logger.setLevel(Level.WARNING);
 
         // Basically saying to not queue this anywhere - return native hook right now
         // Important if wa want to mutate the event before JNativeHook/OS does anything with it

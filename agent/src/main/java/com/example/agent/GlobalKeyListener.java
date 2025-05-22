@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 public class GlobalKeyListener implements NativeKeyListener {
     private final Consumer<InputEvent> handler;
     private static final Logger log = LogService.get().forClass(GlobalKeyListener.class);
+
     /**
      * @param handler a callback to receive each wrapped InputEvent
      */
@@ -24,18 +25,21 @@ public class GlobalKeyListener implements NativeKeyListener {
     public void nativeKeyPressed(NativeKeyEvent e) {
         handler.accept(new KeyEvent(e.getID(), e.getKeyCode(), '\0', e.getModifiers(), System.currentTimeMillis()));
         log.info("Key " + NativeKeyEvent.getKeyText(e.getKeyCode()) + " Pressed");
+        LogService.simple().info(NativeKeyEvent.getKeyText(e.getKeyCode()));
     }
 
     @Override
     public void nativeKeyReleased(NativeKeyEvent e) {
         handler.accept(new KeyEvent(e.getID(), e.getKeyCode(), '\0', e.getModifiers(), System.currentTimeMillis()));
         log.info("Key " + NativeKeyEvent.getKeyText(e.getKeyCode()) + " Released");
+        LogService.simple().info(NativeKeyEvent.getKeyText(e.getKeyCode()));
     }
 
     @Override
     public void nativeKeyTyped(NativeKeyEvent e) {
-        // only typed events carry a real char, but you can still forward code+mods if you like
+        // only typed events carry a real char, but you we can still forward code+mods
         handler.accept(new KeyEvent(e.getID(), e.getKeyCode(), e.getKeyChar(), e.getModifiers(), System.currentTimeMillis()));
         log.info("Key " + e.getKeyChar() + " Typed");
+        LogService.simple().info(String.valueOf(e.getKeyChar()));
     }
 }

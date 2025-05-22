@@ -18,9 +18,9 @@
     <center>
         <TableView fx:id="tableView" prefWidth="600" prefHeight="400">
             <columns>
-                <!-- Column #1: the token string -->
+                <!-- Column #1: token string -->
                 <TableColumn fx:id="tokenCol" text="Token" prefWidth="200"/>
-                <!-- Column #2: the joined properties -->
+                <!-- Column #2: joined properties -->
                 <TableColumn fx:id="propsCol" text="Properties" prefWidth="400"/>
             </columns>
         </TableView>

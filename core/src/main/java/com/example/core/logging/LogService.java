@@ -5,6 +5,8 @@ import java.util.logging.Logger;
 
 public class LogService {
     private static final LogService instance = new LogService();
+    private static final String APP_DETAILED = "com.example.detailed";
+    private static final String APP_SIMPLE = "com.example.simple";
 
     private LogService() {
         Logger log = Logger.getLogger("");
@@ -14,24 +16,23 @@ public class LogService {
     public static LogService get() {
         return instance;
     }
-
-    public static void info(String s) {
-        Logger.getLogger("app").info(s);
+    public static Logger detailed() {
+        return Logger.getLogger(APP_DETAILED);
     }
-
-    public static void warning(String s) {
-        Logger.getLogger("app").warning(s);
+    public static Logger simple() {
+        return Logger.getLogger(APP_SIMPLE);
     }
 
     public Logger forClass(Class<?> cls) {
         return Logger.getLogger(cls.getName());
     }
 
-    public void setGlobalLevel(Level level) {
-        Logger.getLogger("").setLevel(level);
-    }
+//    public void setGlobalLevel(Level level) {
+//        Logger.getLogger("").setLevel(level);
+//    }
 
-    public void setAppLevel(Level level) {
-        Logger.getLogger("app").setLevel(level);
-    }
+    // TO LOOK: Does this actually set the app level through com.example hierarchy?
+//    public void setAppLevel(Level level) {
+//        Logger.getLogger("com.example").setLevel(level);
+//    }
 }

@@ -6,10 +6,23 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.example.ui.controllers.LogController"
-            prefHeight="400.0" prefWidth="600.0">
-    <TextArea fx:id="logArea" editable="false" wrapText="true"/>
-</VBox>
+<SplitPane xmlns="http://javafx.com/javafx/17"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.example.ui.controllers.LogController"
+           orientation="VERTICAL"
+           dividerPositions="0.5, 0.7"
+>
+    <items>
+        <TextArea fx:id="logArea"
+                  editable="false"
+                  wrapText="true"
+                  minHeight="100"/>
+        <TextArea fx:id="basicLogArea"
+                  editable="false"
+                  wrapText="true"
+                  minHeight="100"
+        />
+        <TextArea/>
+    </items>
+</SplitPane>
 
