@@ -52,6 +52,10 @@ public class MainApp extends Application {
         stage.show();
     }
 
+    @Override
+    public void stop() {
+       GlobalHookService.stop();
+    }
     public static void main(String[] args) {
         launch(args);
     }

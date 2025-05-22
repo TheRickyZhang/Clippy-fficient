@@ -16,10 +16,9 @@
         </columns>
     </TableView>
 
-    <TextArea fx:id="logArea" editable="false" wrapText="true"/>
-
     <HBox spacing="8">
         <Button text="Add Hint…"    onAction="#onAddHintClicked"/>
         <Button text="References"  onAction="#onShowReferences"/>
+        <Button text="Log" onAction="#onShowLog"/>
     </HBox>
 </VBox>

@@ -20,7 +20,6 @@ public class GlobalHookService {
 
             GlobalScreen.addNativeKeyListener(new GlobalKeyListener(eventHandler));
             GlobalScreen.addNativeMouseListener(new GlobalMouseListener(eventHandler));
-            GlobalScreen.addNativeMouseWheelListener(new GlobalMouseWheelListener(eventHandler));
         } catch (NativeHookException ex) {
             throw new RuntimeException(ex.getMessage());
         }

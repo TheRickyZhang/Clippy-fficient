@@ -1,10 +1,7 @@
 package com.example.ui.controllers;
 
-import com.example.core.ShortcutEngine;
 import com.example.core.sequence.InputSequence;
-import com.example.ui.app.AppController;
 import com.example.ui.app.Suggestion;
-import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -12,20 +9,11 @@ import javafx.scene.control.*;
 
 import java.util.Optional;
 
-public class SuggestionsController {
+public class SuggestionsController extends BaseController {
     @FXML private TableView<Suggestion> suggestionTable;
     @FXML private TableColumn<Suggestion,String> patternCol;
     @FXML private TableColumn<Suggestion,String> tipCol;
     @FXML private TableColumn<Suggestion,Void> actionCol;
-    @FXML private TextArea logArea;
-
-    private AppController  app;
-    private ShortcutEngine engine;
-
-    public void setAppController(AppController app) {
-        this.app    = app;
-        this.engine = app.getEngine();
-    }
 
     @FXML
     public void initialize() {
@@ -75,18 +63,9 @@ public class SuggestionsController {
             tip.ifPresent(text -> {
                 InputSequence seq = new InputSequence(desc);
                 engine.addTip(seq, text);
-                engine.addAction(seq, () -> appendLog("tip: " + text));
                 suggestionTable.getItems().add(new Suggestion(seq, text));
             });
         });
     }
 
-    @FXML
-    private void onShowReferences() {
-        app.showReferences();
-    }
-
-    public void appendLog(String line) {
-        Platform.runLater(() -> logArea.appendText(line + "\n"));
-    }
 }
