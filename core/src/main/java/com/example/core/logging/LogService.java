@@ -1,6 +1,5 @@
 package com.example.core.logging;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class LogService {
@@ -10,7 +9,7 @@ public class LogService {
 
     private LogService() {
         Logger log = Logger.getLogger("");
-        log.setLevel(Level.ALL);
+//        log.setLevel(Level.ALL);
     }
 
     public static LogService get() {

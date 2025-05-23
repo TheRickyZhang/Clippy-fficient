@@ -1,5 +1,6 @@
 package com.example.ui.controllers;
 
+import com.example.core.logging.LogService;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
@@ -11,22 +12,20 @@ public class LogController extends BaseController {
     @FXML private TextArea basicLogArea;
 
     @FXML public void initialize() {
-        Handler logHandler = createFxLogHandler(logArea);
-        Handler basicLogHandler = createFxLogHandler(basicLogArea);
+        Handler logHandler = createFxLogHandler(logArea, new SimpleFormatter());
+        Handler basicLogHandler = createFxLogHandler(basicLogArea, new Formatter() {
+            @Override public String format(LogRecord r) { return r.getMessage(); }
+        });
 
         // Ensure that we only display logs from this app, not Java internals
-        Logger appLog = Logger.getLogger("com.example");
-        appLog.setLevel(Level.ALL);
-        appLog.setUseParentHandlers(false);
-        appLog.addHandler(logHandler);
+        LogService.detailed().addHandler(logHandler);
+        LogService.simple().addHandler(basicLogHandler);
     }
 
-    protected static Handler createFxLogHandler(TextArea target) {
+    protected static Handler createFxLogHandler(TextArea target, Formatter formatter) {
         Handler h = new Handler() {
-            private final Formatter f = new SimpleFormatter();
-
             @Override public void publish(LogRecord record) {
-                String s = f.format(record);
+                String s = formatter.format(record);
                 Platform.runLater(() -> target.appendText(s + "\n"));
             }
             @Override public void flush() {}

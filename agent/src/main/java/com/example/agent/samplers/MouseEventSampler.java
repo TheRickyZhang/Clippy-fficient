@@ -8,7 +8,7 @@ import com.example.core.utils.Pair;
  * All times are in MS
  */
 public class MouseEventSampler {
-    private final long INTERVAL_MS;    // how frequently we send back event responses
+    private long INTERVAL_MS;    // how frequently we send back event responses
     private final long GAP_MS;         // How long until we consider a movement abandoned
 
     // Refresh on "volatile" keyword - synchronizes accesses for concurrent reads
@@ -28,6 +28,13 @@ public class MouseEventSampler {
         long nowMs = System.nanoTime() / 1_000_000;
         this.prevRawMs = nowMs;
         this.prevEmitMs = nowMs;
+    }
+
+    public long getINTERVAL_MS() {
+        return INTERVAL_MS;
+    }
+    public void setINTERVAL_MS(long interval_ms) {
+        INTERVAL_MS = interval_ms;
     }
 
     public Pair report(int x, int y) {

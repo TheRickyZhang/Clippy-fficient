@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!--Basically extends ToolBar class-->
+<fx:root type="javafx.scene.control.ToolBar"
+         xmlns="http://javafx.com/javafx/17"
+         xmlns:fx="http://javafx.com/fxml/1">
+
+
+    <Button text=" Back" onAction="#onBack"/>
+    <Separator orientation="VERTICAL"/>
+    <Button text="Suggestions" onAction="#onShowMain"/>
+    <Button text="References" onAction="#onShowReferences"/>
+    <Button text="Log" onAction="#onShowLog"/>
+
+    <Region/>
+    <Label text="Search: "/>
+    <TextField fx:id="search" promptText="token..."/>
+</fx:root>
+
+

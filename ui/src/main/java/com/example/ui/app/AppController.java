@@ -1,6 +1,7 @@
 package com.example.ui.app;
 
 import com.example.core.ShortcutEngine;
+import com.example.ui.components.HeaderController;
 import com.example.ui.controllers.LogController;
 import com.example.ui.controllers.ReferencesController;
 import com.example.ui.controllers.SuggestionsController;
@@ -20,6 +21,7 @@ import java.net.URL;
 import java.util.function.Consumer;
 
 public class AppController {
+    @FXML private HeaderController header;
     @FXML private BorderPane rootView;
     private final ShortcutEngine engine;
     private final KeyCombination logKeybind;
@@ -31,6 +33,7 @@ public class AppController {
     }
 
     @FXML public void initialize() {
+        header.setAppController(this);
         showMainView();
     }
 

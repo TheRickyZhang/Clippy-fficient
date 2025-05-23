@@ -2,9 +2,7 @@ package com.example.agent;
 
 import com.example.agent.samplers.MouseEventSampler;
 import com.example.agent.samplers.ScrollEventSampler;
-import com.example.core.events.InputEvent;
-import com.example.core.events.MouseEvent;
-import com.example.core.events.MouseWheelEvent;
+import com.example.core.events.*;
 import com.example.core.logging.LogService;
 import com.example.core.utils.Pair;
 import com.example.core.utils.ScrollDelta;
@@ -32,39 +30,38 @@ public class GlobalMouseListener
         movementSampler = new MouseEventSampler();
         dragSampler = new MouseEventSampler();
         scrollSampler = new ScrollEventSampler();
+        log.info("Global Mouse Listener created");
     }
 
     @Override
     public void nativeMouseClicked(NativeMouseEvent e) {
-        handler.accept(new MouseEvent(
-                e.getID(), e.getButton(),
-                e.getX(), e.getY(),
+        handler.accept(new MouseClickEvent(
+                e.getButton(),
                 e.getClickCount(),
+                e.getX(), e.getY(),
                 System.currentTimeMillis()
         ));
-        log.info("Mouse Button " + e.paramString() + " Clicked");
-        LogService.simple().info("Mouse clicked");
-    }
-    @Override
-    public void nativeMousePressed(NativeMouseEvent e) {
-        handler.accept(new MouseEvent(
-                e.getID(), e.getButton(),
-                e.getX(), e.getY(),
-                e.getClickCount(),
-                System.currentTimeMillis()
-        ));
-        log.info("Mouse Button " + e.paramString() + " Clicked");
+        LogService.detailed().info("Mouse Button " + e.paramString() + " Clicked");
         LogService.simple().info("Mouse Clicked");
     }
     @Override
-    public void nativeMouseReleased(NativeMouseEvent e) {
-        handler.accept(new MouseEvent(
-                e.getID(), e.getButton(),
+    public void nativeMousePressed(NativeMouseEvent e) {
+        handler.accept(new MousePressEvent(
+                e.getButton(),
                 e.getX(), e.getY(),
-                e.getClickCount(),
                 System.currentTimeMillis()
         ));
-        log.info("Mouse Button " + e.paramString() + " Released");
+        LogService.detailed().info("Mouse Button " + e.paramString() + " Pressed");
+        LogService.simple().info("Mouse Pressed");
+    }
+    @Override
+    public void nativeMouseReleased(NativeMouseEvent e) {
+        handler.accept(new MouseReleaseEvent(
+                e.getButton(),
+                e.getX(), e.getY(),
+                System.currentTimeMillis()
+        ));
+        LogService.detailed().info("Mouse Button " + e.paramString() + " Released");
         LogService.simple().info("Mouse Released");
     }
 
@@ -76,13 +73,13 @@ public class GlobalMouseListener
     public void nativeMouseMoved(NativeMouseEvent e) {
         Pair p = movementSampler.report(e.getX(), e.getY());
         if(p != null) {
-            handler.accept(new MouseEvent(
-                    e.getID(), NativeMouseEvent.NOBUTTON,
+            handler.accept(new MouseMoveEvent(
+                    p.x(), p.y(),
                     e.getX(), e.getY(),
-                    0,
+                    movementSampler.getINTERVAL_MS(),
                     System.currentTimeMillis()
             ));
-            log.info("Mouse Moved" + e.paramString());
+            LogService.detailed().info("Mouse Moved" + e.paramString());
             LogService.simple().info("Mouse Moved");
         }
     }
@@ -90,13 +87,14 @@ public class GlobalMouseListener
     public void nativeMouseDragged(NativeMouseEvent e) {
         Pair p = dragSampler.report(e.getX(), e.getY());
         if(p != null) {
-            handler.accept(new MouseEvent(
-                    e.getID(), e.getButton(),
+            handler.accept(new MouseDragEvent(
+                    p.x(), p.y(),
                     e.getX(), e.getY(),
-                    e.getClickCount(),
+                    e.getButton(),
+                    dragSampler.getINTERVAL_MS(),
                     System.currentTimeMillis()
             ));
-            log.info("Mouse Dragged" + e.paramString());
+            LogService.detailed().info("Mouse Dragged" + e.paramString());
             LogService.simple().info("Mouse Dragged");
         }
     }
@@ -109,12 +107,12 @@ public class GlobalMouseListener
         ScrollDelta t = scrollSampler.report(scroll, e.getX(), e.getY());
         if(t != null) {
             handler.accept(new MouseWheelEvent(
-                    e.getID(),
-                    e.getWheelRotation(),
+                    t.scroll(),
+                    t.x(), t.y(),
                     e.getX(), e.getY(),
                     System.currentTimeMillis()
             ));
-            log.info("Mouse Wheel Moved" + e.paramString());
+            LogService.detailed().info("Mouse Wheel Moved" + e.paramString());
             LogService.simple().info("Mouse Wheel Moved");
         }
     }

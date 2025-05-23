@@ -8,7 +8,7 @@ import com.example.core.utils.ScrollDelta;
  * All times are in MS
  */
 public class ScrollEventSampler {
-    private final long INTERVAL_MS;    // how frequently we send back event responses
+    private long INTERVAL_MS;    // how frequently we send back event responses
     private final long GAP_MS;         // How long until we consider a movement abandoned
     private final int SCROLL_THRESHOLD;       // The cumulative scroll must be >= threshold to return
 
@@ -20,6 +20,12 @@ public class ScrollEventSampler {
     private volatile int prevY = 0;
     private int cumScroll = 0;             // The total scroll units in the GAP_MS window
 
+    public long getINTERVAL_MS() {
+        return INTERVAL_MS;
+    }
+    public void setINTERVAL_MS(long interval_ms) {
+        INTERVAL_MS = interval_ms;
+    }
 
     // TODO: Is 40 a good amount?
     public ScrollEventSampler() {

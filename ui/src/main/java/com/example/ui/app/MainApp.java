@@ -9,7 +9,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
@@ -42,7 +41,7 @@ public class MainApp extends Application {
         try {
             root = loader.load();
             System.out.println("FXML loaded, controller = " + loader.getController());
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.err.println("Error loading FXML: " + e.getMessage());
             throw e;
         }
