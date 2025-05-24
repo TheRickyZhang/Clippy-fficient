@@ -8,8 +8,6 @@
 
     <top>
         <ToolBar>
-            <Button text="← Back" onAction="#onBack"/>
-            <Separator orientation="VERTICAL"/>
             <Label text="Filter: "/>
             <TextField fx:id="filterReferences" promptText="token..."/>
         </ToolBar>

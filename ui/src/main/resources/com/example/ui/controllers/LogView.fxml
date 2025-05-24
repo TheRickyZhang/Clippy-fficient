@@ -8,6 +8,7 @@
 
 <SplitPane xmlns="http://javafx.com/javafx/17"
            xmlns:fx="http://javafx.com/fxml/1"
+           fx:id="root"
            fx:controller="com.example.ui.controllers.LogController"
            orientation="VERTICAL"
            dividerPositions="0.5, 0.7"

@@ -13,14 +13,17 @@ import java.net.URL;
 import java.util.List;
 
 public class MainApp extends Application {
+    private ApplicationContext context;
+    private ShortcutEngine engine;
+    private GlobalHookService hookService;
+
     @Override
     public void start(Stage stage) throws Exception {
-        ApplicationContext ctx    = new ApplicationContext(List.of());
-        ShortcutEngine    engine = new ShortcutEngine();
-        GlobalHookService.start(engine::onEvent);
+        context = new ApplicationContext(List.of());
+        engine = new ShortcutEngine();
+        hookService = new GlobalHookService(engine::onEvent);
 
         URL fxmlUrl = getClass().getResource("/com/example/ui/app/AppView.fxml");
-        System.out.println("Loading FXML from: " + fxmlUrl);
         if (fxmlUrl == null) {
             throw new IllegalStateException("Couldn’t find AppView.fxml on the classpath!");
         }

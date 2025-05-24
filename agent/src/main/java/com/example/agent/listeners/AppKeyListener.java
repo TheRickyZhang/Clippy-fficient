@@ -1,4 +1,4 @@
-package com.example.agent;
+package com.example.agent.listeners;
 
 import com.example.core.events.InputEvent;
 import com.example.core.events.KeyPressEvent;
@@ -12,14 +12,14 @@ import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 // See KeyEvent for specifics of converting keys
-public class GlobalKeyListener implements NativeKeyListener {
+public class AppKeyListener implements NativeKeyListener {
     private final Consumer<InputEvent> handler;
-    private static final Logger log = LogService.get().forClass(GlobalKeyListener.class);
+    private static final Logger log = LogService.get().forClass(AppKeyListener.class);
 
     /**
      * @param handler a callback to receive each wrapped InputEvent
      */
-    public GlobalKeyListener(Consumer<InputEvent> handler) {
+    public AppKeyListener(Consumer<InputEvent> handler) {
         this.handler = handler;
         log.info("Global Key Listener created");
     }
