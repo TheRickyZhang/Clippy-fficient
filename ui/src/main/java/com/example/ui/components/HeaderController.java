@@ -39,6 +39,6 @@ public class HeaderController extends ToolBar {
     @FXML private void onShowReferences() { app.showReferencesView(); }
     @FXML private void onShowLog()        { app.showLogView(); }
     @FXML private void onSearchOpen() {
-        searchDialog.open();
+        new SearchDialog().open();
     }
 }
