@@ -49,6 +49,7 @@ public class SuggestionsController extends BaseController {
         });
     }
 
+
     @FXML
     private void onAddHintClicked() {
         TextInputDialog patDlg = new TextInputDialog();

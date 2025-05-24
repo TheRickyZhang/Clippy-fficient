@@ -43,6 +43,7 @@ public class LogController extends BaseController {
         });
     }
 
+
     /**
      * Call this in your AppController *before* unloading/removing this view
      * to avoid leaking subscriptions.

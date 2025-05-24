@@ -1,15 +1,15 @@
 package com.example.ui.components;
 
 import com.example.ui.app.AppController;
+import com.example.ui.search.SearchDialog;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
 
 import java.io.IOException;
 
 public class HeaderController extends ToolBar {
-    @FXML private TextField search;
+    private SearchDialog searchDialog;
     private AppController app;
 
     public HeaderController() {
@@ -23,6 +23,11 @@ public class HeaderController extends ToolBar {
         }
     }
 
+    @FXML
+    public void initialize() {
+        searchDialog = new SearchDialog();
+    }
+
 
     public void setAppController(AppController app) {
         this.app = app;
@@ -33,4 +38,7 @@ public class HeaderController extends ToolBar {
     @FXML private void onShowMain()       { app.showMainView(); }
     @FXML private void onShowReferences() { app.showReferencesView(); }
     @FXML private void onShowLog()        { app.showLogView(); }
+    @FXML private void onSearchOpen() {
+        searchDialog.open();
+    }
 }

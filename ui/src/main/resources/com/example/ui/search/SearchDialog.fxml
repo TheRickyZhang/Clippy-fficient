@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="4" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      >
+    <TextField fx:id="tf" promptText="Type to search…"/>
+    <ListView fx:id="results" prefHeight="200"/>
+</VBox>

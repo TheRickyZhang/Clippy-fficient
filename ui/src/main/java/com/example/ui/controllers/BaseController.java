@@ -8,6 +8,9 @@ public abstract class BaseController {
     protected AppController app;
     protected ShortcutEngine engine;
 
+    public BaseController() {
+    }
+
     public void setAppController(AppController app) {
         this.app = app;
         this.engine = app.getEngine();

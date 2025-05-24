@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-
 <!--Basically extends ToolBar class-->
+<?import com.example.ui.search.SearchDialog?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.Region?>
 <fx:root type="javafx.scene.control.ToolBar"
          xmlns="http://javafx.com/javafx/17"
          xmlns:fx="http://javafx.com/fxml/1">
@@ -21,7 +17,7 @@
 
     <Region/>
     <Label text="Search: "/>
-    <TextField fx:id="search" promptText="token..."/>
+    <Button text="🔍" onAction="#onSearchOpen"/>
 </fx:root>
 
 

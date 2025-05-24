@@ -5,6 +5,7 @@ plugins {
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
     implementation 'com.github.kwhat:jnativehook:2.2.2'
+    compileOnly 'org.jetbrains:annotations:24.0.0'
 }
 tasks.test {
     useJUnitPlatform();

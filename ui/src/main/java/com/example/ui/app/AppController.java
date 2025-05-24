@@ -1,6 +1,9 @@
 package com.example.ui.app;
 
 import com.example.core.ShortcutEngine;
+import com.example.core.search.SearchEntry;
+import com.example.core.search.SearchService;
+import com.example.core.tokens.TokenRegistry;
 import com.example.ui.components.HeaderController;
 import com.example.ui.controllers.LogController;
 import com.example.ui.controllers.ReferencesController;
@@ -21,27 +24,35 @@ import java.net.URL;
 import java.util.function.Consumer;
 
 public class AppController {
-    @FXML private HeaderController header;
-    @FXML private BorderPane rootView;
+    @FXML
+    private HeaderController header;
+    @FXML
+    private BorderPane rootView;
     private final ShortcutEngine engine;
     private final KeyCombination logKeybind;
     private final KeyCombination referencesKeybind;
+
+    private LogController logController;
+    private ReferencesController referencesController;
+    private SuggestionsController suggestionsController;
+
     public AppController(ShortcutEngine engine) {
         this.engine = engine;
         this.logKeybind = new KeyCodeCombination(KeyCode.L, KeyCombination.CONTROL_DOWN);
         this.referencesKeybind = new KeyCodeCombination(KeyCode.R, KeyCombination.CONTROL_DOWN);
     }
 
-    @FXML public void initialize() {
+    @FXML
+    public void initialize() {
         header.setAppController(this);
+        initSearch();
         showMainView();
     }
 
 
     private <T> void loadCenter(String fxmlPath,
                                 Class<T> controllerType,
-                                Consumer<T> init)
-    {
+                                Consumer<T> init) {
         try {
             URL url = getClass().getResource(fxmlPath);
             System.out.println("Loading FXML at path: " + fxmlPath + " → URL: " + url);
@@ -70,7 +81,7 @@ public class AppController {
     }
 
     // TODO: Add more application-specific shortcuts - maybe hard code into shortcut detection?
-    public void registerGlobalShortcuts (Scene scene) {
+    public void registerGlobalShortcuts(Scene scene) {
         scene.getAccelerators().put(this.referencesKeybind, this::showReferencesView);
         scene.getAccelerators().put(this.logKeybind, this::showLogView);
     }
@@ -80,7 +91,10 @@ public class AppController {
         loadCenter(
                 "/com/example/ui/controllers/SuggestionsView.fxml",
                 SuggestionsController.class,
-                ctrl -> ctrl.setAppController(this)
+                ctrl ->  {
+                    ctrl.setAppController(this);
+                    this.suggestionsController = ctrl;
+                }
         );
     }
 
@@ -88,7 +102,10 @@ public class AppController {
         loadCenter(
                 "/com/example/ui/controllers/ReferencesView.fxml",
                 ReferencesController.class,
-                ctrl -> ctrl.setAppController(this)
+                ctrl -> {
+                    ctrl.setAppController(this);
+                    this.referencesController = ctrl;
+                }
         );
     }
 
@@ -96,8 +113,33 @@ public class AppController {
         loadCenter(
                 "/com/example/ui/controllers/LogView.fxml",
                 LogController.class,
-                ctrl->ctrl.setAppController(this)
+                ctrl -> {
+                  ctrl.setAppController(this);
+                  this.logController = ctrl;
+                }
         );
+    }
+
+    private void initSearch() {
+        SearchService s = SearchService.get();
+//        s.get().registerProvider("Main", () -> {
+//            System.out.println("Going to main page");
+//            showMainView();
+//        })).toList();
+
+        s.registerProvider("References", () ->
+                // for each token/key in your registry…
+                TokenRegistry.getTokenMapValues().stream()
+                        .map(e -> new SearchEntry(
+                                /* page */   "References",
+                                /* display */e.getKey(),
+                                /* action: */() -> {
+                            // when the user double-clicks this entry:
+                            referencesController.selectToken(e.getKey());
+                        }))
+                        .toList()
+        );
+
     }
 
     // TODO: open new window on top (popup) - is this the right place?
