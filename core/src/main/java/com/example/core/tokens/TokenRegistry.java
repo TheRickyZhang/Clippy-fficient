@@ -44,47 +44,27 @@ public final class TokenRegistry {
         nativeIdToMouseEventClass.put(NativeMouseEvent.NATIVE_MOUSE_WHEEL, MouseWheelEvent.class);
 
         try {
-            // 1) Key event type tokens (e.g., KEY_PRESSED, KEY_RELEASED, KEY_TYPED)
-            for (Field f : NativeKeyEvent.class.getFields()) {
-                if (Modifier.isStatic(f.getModifiers()) && f.getType() == int.class && f.getName().startsWith("NATIVE_KEY_")) {
-                    if (f.getName().equals("NATIVE_KEY_UNKNOWN")) continue;
-
-                    int nativeId = f.getInt(null);
-                    String tokenName = f.getName().substring("NATIVE_".length()); // e.g., "KEY_PRESSED"
-
-                    Class<? extends InputEvent> specificEventClass = nativeIdToKeyEventClass.get(nativeId);
-                    if (specificEventClass != null) {
-                        // Predicate checks for an instance of your specific event class
-                        Predicate<InputEvent> p = specificEventClass::isInstance;
-                        m.put(tokenName, p);
-                        metas.add(new TokenMeta(tokenName, specificEventClass, nativeId, null, null, null, null));
-                    }
-                }
-            }
-
-            // 2) Key code tokens (e.g., A, B, DIGIT1, F1, etc., associated with key presses)
+            // PRESSED, RELEASED keys
             for (Field f : NativeKeyEvent.class.getFields()) {
                 if (Modifier.isStatic(f.getModifiers()) && f.getType() == int.class && f.getName().startsWith("VC_")) {
                     int keyCode = f.getInt(null);
                     String tokenName = f.getName().substring("VC_".length());
-                    // Key code tokens typically imply a key press
-                    Predicate<InputEvent> p = e -> e instanceof KeyPressEvent kpe && kpe.keyCode() == keyCode;
-                    m.put(tokenName, p);
-                    metas.add(new TokenMeta(tokenName, KeyPressEvent.class, NativeKeyEvent.NATIVE_KEY_PRESSED, keyCode, null, null, null));
+                    m.put(tokenName + "*", e -> e instanceof KeyPressEvent kpe && kpe.keyCode() == keyCode);
+                    m.put(tokenName + "^", e -> e instanceof KeyReleaseEvent kpe && kpe.keyCode() == keyCode);
+                    metas.add(new TokenMeta(tokenName + "*", KeyPressEvent.class, NativeKeyEvent.NATIVE_KEY_PRESSED, keyCode, null, null, null));
+                    metas.add(new TokenMeta(tokenName + "^", KeyPressEvent.class, NativeKeyEvent.NATIVE_KEY_RELEASED, keyCode, null, null, null));
                 }
             }
 
-            // 3) Typed character tokens (printable ASCII characters)
+            // TYPED Keys
             for (char c = 32; c < 127; c++) {
                 String tokenName = String.valueOf(c);
-                final char finalC = c; // effectively final for lambda
-                // Typed character tokens imply a key typed event
-                Predicate<InputEvent> p = e -> e instanceof KeyTypedEvent kte && kte.keyChar() == finalC;
-                m.put(tokenName, p);
+                final char finalC = c;
+                m.put(tokenName,  e -> e instanceof KeyTypedEvent kte && kte.keyChar() == finalC);
                 metas.add(new TokenMeta(tokenName, KeyTypedEvent.class, NativeKeyEvent.NATIVE_KEY_TYPED, null, finalC, null, null));
             }
 
-            // 4) Mouse event type tokens (e.g., MOUSE_PRESSED, MOUSE_CLICKED, MOUSE_MOVED)
+            // Mouse Actions (ex. Clicked)
             for (Field f : NativeMouseEvent.class.getFields()) {
                 if (Modifier.isStatic(f.getModifiers()) && f.getType() == int.class && f.getName().startsWith("NATIVE_MOUSE_")) {
                     if (f.getName().equals("NATIVE_MOUSE_ENTRY") || f.getName().equals("NATIVE_MOUSE_EXIT")) continue; // Optional: Skip if not needed
@@ -101,31 +81,26 @@ public final class TokenRegistry {
                 }
             }
 
-            // 5) Mouse button tokens (e.g., BUTTON1, BUTTON2, associated with mouse presses)
+            // Mouse Button Tokens (TODO: Inspect if this is really correct / necessary? Seems like it might need an exception in syntax handling for MousePressed(Button))
             for (Field f : NativeMouseEvent.class.getFields()) {
-                // Ensure it's a static int field, starts with "BUTTON", and is not BUTTON_NOBUTTON
                 if (Modifier.isStatic(f.getModifiers()) && f.getType() == int.class &&
                         f.getName().startsWith("BUTTON") && !f.getName().equals("BUTTON_NOBUTTON") &&
-                        // Filter out potential non-button constants like BUTTON_COUNT (if JNativeHook adds such a thing)
                         f.getInt(null) >= NativeMouseEvent.BUTTON1 && f.getInt(null) <= NativeMouseEvent.BUTTON5) {
-
                     int button = f.getInt(null);
-                    String tokenName = f.getName(); // e.g., "BUTTON1"
-                    // Mouse button tokens typically imply a mouse press
+                    String tokenName = f.getName();
                     Predicate<InputEvent> p = e -> e instanceof MousePressEvent mpe && mpe.button() == button;
                     m.put(tokenName, p);
                     metas.add(new TokenMeta(tokenName, MousePressEvent.class, NativeMouseEvent.NATIVE_MOUSE_PRESSED, null, null, button, null));
                 }
             }
 
-            // 6) Wheel scroll up/down tokens
+            // Wheel Scrolling
             int nativeMouseWheelEventType = NativeMouseEvent.NATIVE_MOUSE_WHEEL;
-            // SCROLL_UP
+
             Predicate<InputEvent> scrollUp = e -> e instanceof MouseWheelEvent mwe && mwe.cumScroll() < 0;
             m.put("SCROLL_UP", scrollUp);
             metas.add(new TokenMeta("SCROLL_UP", MouseWheelEvent.class, nativeMouseWheelEventType, null, null, null, -1));
 
-            // SCROLL_DOWN
             Predicate<InputEvent> scrollDown = e -> e instanceof MouseWheelEvent mwe && mwe.cumScroll() > 0;
             m.put("SCROLL_DOWN", scrollDown);
             metas.add(new TokenMeta("SCROLL_DOWN", MouseWheelEvent.class, nativeMouseWheelEventType, null, null, null, 1));

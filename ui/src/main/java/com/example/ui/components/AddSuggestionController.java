@@ -16,6 +16,7 @@ public class AddSuggestionController {
     @FXML
     private void initialize() {
         actionField.setItems(FXCollections.observableArrayList(AppAction.values()));
+        actionField.getSelectionModel().selectFirst();
         errorLabel.setVisible(false);
     }
 
@@ -26,7 +27,7 @@ public class AddSuggestionController {
     public void clearFields() {
         sequenceField.clear();
         hintField.clear();
-        actionField.getSelectionModel().clearSelection();
+        actionField.getSelectionModel().selectFirst();
         errorLabel.setVisible(false);
     }
 }
