@@ -6,17 +6,17 @@
 <VBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.example.ui.controllers.HomeController"
-      spacing="8" style="-fx-padding:10">
+>
 
     <TableView fx:id="suggestionTable">
         <columns>
             <TableColumn text="Sequence" fx:id="sequenceCol"/>
-            <TableColumn text="Hint"    fx:id="hintCol"/>
-            <TableColumn text="Action"  fx:id="actionCol"/>
+            <TableColumn text="Hint" fx:id="hintCol"/>
+            <TableColumn text="Action" fx:id="actionCol"/>
         </columns>
     </TableView>
 
     <HBox spacing="8">
-        <Button text="Add Entry"    onAction="#onAddEntry"/>
+        <Button text="Add Entry" onAction="#onAddEntry"/>
     </HBox>
 </VBox>

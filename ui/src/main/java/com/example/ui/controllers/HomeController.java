@@ -2,8 +2,8 @@ package com.example.ui.controllers;
 
 import com.example.core.sequence.InputSequence;
 import com.example.core.utils.AppActionType;
-import com.example.core.utils.Suggestion;
 import com.example.core.utils.Pair;
+import com.example.core.utils.Suggestion;
 import com.example.ui.components.AddSuggestionController;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
