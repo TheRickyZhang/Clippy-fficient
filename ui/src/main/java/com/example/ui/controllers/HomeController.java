@@ -157,7 +157,7 @@ public class HomeController extends BaseController {
             ctrl.closeBtn.setOnAction(evt -> dialog.close());
             dialog.show();
         } catch (IOException e) {
-            new Alert(Alert.AlertType.ERROR, "Failed to load dialog:\n" + e.getMessage())y.showAndWait();
+            new Alert(Alert.AlertType.ERROR, "Failed to load dialog:\n" + e.getMessage()).showAndWait();
         }
     }
 }
