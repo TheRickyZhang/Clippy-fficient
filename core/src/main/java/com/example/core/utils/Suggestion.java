@@ -8,9 +8,9 @@ import com.example.core.sequence.InputSequence;
 public class Suggestion {
     private InputSequence sequence;
     private String tip;
-    private AppActionType actionType;
+    private AppAction actionType;
 
-    public Suggestion(InputSequence seq, String tip, AppActionType type) {
+    public Suggestion(InputSequence seq, String tip, AppAction type) {
         this.sequence = seq;
         this.tip = tip;
         this.actionType = type;
@@ -31,11 +31,11 @@ public class Suggestion {
         tip = t;
     }
 
-    public AppActionType getActionType() {
+    public AppAction getActionType() {
         return actionType;
     }
 
-    public void setActionType(AppActionType t) {
+    public void setActionType(AppAction t) {
         actionType = t;
     }
 }

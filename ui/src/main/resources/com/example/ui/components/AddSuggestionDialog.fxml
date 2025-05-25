@@ -1,31 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import javafx.collections.FXCollections?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<DialogPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.example.ui.components.AddSuggestionController"
-            prefHeight="400.0" prefWidth="600.0">
-    <content>
-        <VBox spacing="12" padding="20">
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="Sequence:"/>
-                <TextField fx:id="sequenceField" prefWidth="200"/>
-            </HBox>
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="Hint:"/>
-                <TextField fx:id="hintField" prefWidth="200"/>
-            </HBox>
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="Action:"/>
-                <ComboBox fx:id="actionField"/>
-            </HBox>
-        </VBox>
 
-    </content>
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.ui.components.AddSuggestionController"
+      spacing="10">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
 
-    <!-- implicit <buttonTypes> ... <> section - use built-in setResultConverter on callback-->
-    <ButtonType text="OK" buttonData="OK_DONE"/>
-    <ButtonType text="Cancel" buttonData="CANCEL_CLOSE"/>
-</DialogPane>
+    <!-- Inline error -->
+    <Label fx:id="errorLabel" textFill="red" visible="false"/>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Sequence:"/>
+        <TextField fx:id="sequenceField" prefWidth="200"/>
+    </HBox>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Hint:"/>
+        <TextField fx:id="hintField" prefWidth="200"/>
+    </HBox>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Action:"/>
+        <ComboBox fx:id="actionField" prefWidth="200"/>
+    </HBox>
+
+    <!-- Real buttons, so nothing auto-closes -->
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button fx:id="addBtn"   text="Add"/>
+        <Button fx:id="closeBtn" text="Close"/>
+    </HBox>
+</VBox>

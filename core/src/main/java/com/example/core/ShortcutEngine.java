@@ -4,7 +4,7 @@ import com.example.core.context.ApplicationContext;
 import com.example.core.events.InputEvent;
 import com.example.core.sequence.EventBuffer;
 import com.example.core.sequence.InputSequence;
-import com.example.core.utils.AppActionType;
+import com.example.core.utils.AppAction;
 import com.example.core.utils.Suggestion;
 
 import java.util.*;
@@ -15,10 +15,10 @@ public class ShortcutEngine {
     private final ApplicationContext context;
     private final EventBuffer buffer = new EventBuffer(10);
     private final Map<InputSequence, Suggestion> suggestions = new HashMap<>();
-    Map<AppActionType,Consumer<Suggestion>> listeners;
+    Map<AppAction,Consumer<Suggestion>> listeners;
 
     // TODO: Initialize with context?
-    public ShortcutEngine(Map<AppActionType, Consumer<Suggestion>> l) {
+    public ShortcutEngine(Map<AppAction, Consumer<Suggestion>> l) {
         this.context = new ApplicationContext(List.of());
         listeners = l;
     }

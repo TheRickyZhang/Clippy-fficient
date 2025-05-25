@@ -1,39 +1,32 @@
 package com.example.ui.components;
 
-import com.example.core.utils.AppActionType;
+import com.example.core.utils.AppAction;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 
 public class AddSuggestionController {
-    @FXML private TextField sequenceField;
-    @FXML private TextField hintField;
-    @FXML private ComboBox<AppActionType> actionField;
+    @FXML public Label   errorLabel;
+    @FXML public TextField sequenceField;
+    @FXML public TextField hintField;
+    @FXML public ComboBox<AppAction> actionField;
+    @FXML public Button  addBtn;
+    @FXML public Button  closeBtn;
 
-    @FXML private ButtonType okButton;
-    @FXML private ButtonType cancelButton;
-
-    @FXML private void initialize() {
-        actionField.setItems(FXCollections.observableArrayList(AppActionType.values()));
-        actionField.setValue(AppActionType.OPEN_POPUP);
+    @FXML
+    private void initialize() {
+        actionField.setItems(FXCollections.observableArrayList(AppAction.values()));
+        errorLabel.setVisible(false);
     }
 
-    // TODO: Get feedback on submission (check the shortcut syntax)
+    public String getSequence()      { return sequenceField.getText(); }
+    public String getHint()          { return hintField.getText(); }
+    public AppAction getActionType() { return actionField.getValue(); }
 
-    public String getSequence() {
-        return sequenceField.getText();
+    public void clearFields() {
+        sequenceField.clear();
+        hintField.clear();
+        actionField.getSelectionModel().clearSelection();
+        errorLabel.setVisible(false);
     }
-    public String getHint() {
-        return hintField.getText();
-    }
-    /**
-     * Turn the user’s choice into the actual Consumer<String> that core will call.
-     */
-    public AppActionType getActionType() {
-        return actionField.getValue();
-    }
-
-
 }

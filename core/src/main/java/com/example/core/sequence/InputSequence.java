@@ -50,7 +50,7 @@ public class InputSequence {
     public static String getErrorString(List<Pair<String, Optional<String>>> errors) {
         StringBuilder msg = new StringBuilder();
         for (Pair<String, Optional<String>> err : errors) {
-            msg.append("“").append(err.second()).append("” not recognized");
+            msg.append("“").append(err.first()).append("” not recognized");
             if(err.second().isPresent()) {
                 msg.append(" (did you mean “").append(err.second().get()).append("”)");
             }

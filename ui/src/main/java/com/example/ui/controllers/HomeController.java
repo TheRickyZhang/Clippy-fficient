@@ -1,7 +1,7 @@
 package com.example.ui.controllers;
 
 import com.example.core.sequence.InputSequence;
-import com.example.core.utils.AppActionType;
+import com.example.core.utils.AppAction;
 import com.example.core.utils.Pair;
 import com.example.core.utils.Suggestion;
 import com.example.ui.components.AddSuggestionController;
@@ -12,19 +12,27 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
 public class HomeController extends BaseController {
-    @FXML private TableView<Suggestion>        suggestionTable;
-    @FXML private TableColumn<Suggestion, String> sequenceCol;
-    @FXML private TableColumn<Suggestion, String> hintCol;
-    @FXML private TableColumn<Suggestion, AppActionType> actionCol;
+    @FXML
+    private TableView<Suggestion> suggestionTable;
+    @FXML
+    private TableColumn<Suggestion, String> sequenceCol;
+    @FXML
+    private TableColumn<Suggestion, String> hintCol;
+    @FXML
+    private TableColumn<Suggestion, AppAction> actionCol;
 
     private final ObservableList<Suggestion> suggestions = FXCollections.observableArrayList();
 
@@ -49,10 +57,10 @@ public class HomeController extends BaseController {
         );
         sequenceCol.setCellFactory(TextFieldTableCell.forTableColumn());
         sequenceCol.setOnEditCommit(e -> {
-            Suggestion s   = e.getRowValue();
+            Suggestion s = e.getRowValue();
             List<String> tokens = InputSequence.toTokenList(e.getNewValue());
             List<Pair<String, Optional<String>>> errors = InputSequence.parse(tokens);
-            if(errors.isEmpty()) {
+            if (errors.isEmpty()) {
                 app.getEngine().removeSuggestion(e.getRowValue().getSequence());
                 s.setSequence(new InputSequence(tokens)); // Modify existing suggestion
                 app.getEngine().putSuggestion(s);
@@ -79,10 +87,10 @@ public class HomeController extends BaseController {
         actionCol.setCellValueFactory(c ->
                 new SimpleObjectProperty<>(c.getValue().getActionType())
         );
-        actionCol.setCellFactory(ComboBoxTableCell.forTableColumn(AppActionType.values()));
+        actionCol.setCellFactory(ComboBoxTableCell.forTableColumn(AppAction.values()));
         actionCol.setOnEditCommit(e -> {
-            Suggestion s             = e.getRowValue();
-            AppActionType newType    = e.getNewValue();
+            Suggestion s = e.getRowValue();
+            AppAction newType = e.getNewValue();
             s.setActionType(newType);
             app.getEngine().putSuggestion(s);
         });
@@ -114,40 +122,42 @@ public class HomeController extends BaseController {
 
     @FXML
     private void onAddEntry() {
-        // Returns {sequence, hint}
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/ui/components/AddSuggestionDialog.fxml"));
-        DialogPane pane;
         try {
-            pane = loader.load();
-        } catch (IOException e) {
-            System.err.println("Couldn't load for SOME reason.");
-            return;
-        }
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/example/ui/components/AddSuggestionDialog.fxml")
+            );
+            Parent root = loader.load();
+            AddSuggestionController ctrl = loader.getController();
 
-        Dialog<Suggestion> d = new Dialog<>();
-        d.setTitle("Add suggestion");
-        d.setDialogPane(pane);
+            Stage dialog = new Stage();
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            dialog.initOwner(suggestionTable.getScene().getWindow());
+            dialog.setTitle("Add suggestion");
+            dialog.setScene(new Scene(root));
 
-        d.setResultConverter(b -> {
-            if(b.getButtonData() == ButtonBar.ButtonData.OK_DONE) {
-                AddSuggestionController ctrl = loader.getController();
-                List<String> tokens = InputSequence.toTokenList(ctrl.getSequence());
-                List<Pair<String, Optional<String>>> errors = InputSequence.parse(tokens);
-                if(errors.isEmpty()) {
-                    return new Suggestion(new InputSequence(tokens), ctrl.getHint(), ctrl.getActionType());
-                } else {
-                    // Show alert and keep dialogue open
-                    new Alert(Alert.AlertType.WARNING, InputSequence.getErrorString(errors));
-                    return null;
+            // Add button tried to add an entry, but doesn't close the window
+            ctrl.addBtn.setOnAction(evt -> {
+                var tokens = InputSequence.toTokenList(ctrl.getSequence());
+                var errors = InputSequence.parse(tokens);
+                if (!errors.isEmpty()) {
+                    ctrl.errorLabel.setText(InputSequence.getErrorString(errors));
+                    ctrl.errorLabel.setVisible(true);
+                    return;  // keep the window open
                 }
-            }
-            return null;
-        });
+                Suggestion s = new Suggestion(
+                        new InputSequence(tokens),
+                        ctrl.getHint(),
+                        ctrl.getActionType()
+                );
+                app.getEngine().putSuggestion(s);
+                suggestions.add(s);
+                ctrl.clearFields();
+            });
 
-        Optional<Suggestion> res = d.showAndWait();
-        res.ifPresent(s -> {
-            app.getEngine().putSuggestion(s);
-            suggestions.remove(s);
-        });
+            ctrl.closeBtn.setOnAction(evt -> dialog.close());
+            dialog.show();
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR, "Failed to load dialog:\n" + e.getMessage())y.showAndWait();
+        }
     }
 }

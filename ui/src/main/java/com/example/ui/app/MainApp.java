@@ -3,9 +3,10 @@ package com.example.ui.app;
 import com.example.agent.GlobalHookService;
 import com.example.core.ShortcutEngine;
 import com.example.core.context.ApplicationContext;
-import com.example.core.utils.AppActionType;
+import com.example.core.utils.AppAction;
 import com.example.core.utils.Suggestion;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -68,16 +69,16 @@ public class MainApp extends Application {
         launch(args);
     }
 
-    private Map<AppActionType, Consumer<Suggestion>> initUIListeners() {
-        return Map.of(AppActionType.OPEN_POPUP,
-                (s) -> {
-                    var a = new Alert(Alert.AlertType.INFORMATION, s.getTip());
-                    a.showAndWait();
-                },
-                AppActionType.MAKE_SOUND,
-                (s) -> {
-                    System.out.println("Made sound" + s.getTip());
-                }
+    private Map<AppAction, Consumer<Suggestion>> initUIListeners() {
+        return Map.of(
+                AppAction.OPEN_POPUP,
+                s -> Platform.runLater(() ->
+                        new Alert(Alert.AlertType.INFORMATION, s.getTip())
+                                .showAndWait()
+                ),
+                AppAction.MAKE_SOUND,
+                s -> System.out.println("Made sound" + s.getTip())
         );
     }
+
 }
