@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.collections.FXCollections?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<DialogPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.ui.components.AddSuggestionController"
+            prefHeight="400.0" prefWidth="600.0">
+    <content>
+        <VBox spacing="12" padding="20">
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Sequence:"/>
+                <TextField fx:id="sequenceField" prefWidth="200"/>
+            </HBox>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Hint:"/>
+                <TextField fx:id="hintField" prefWidth="200"/>
+            </HBox>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Action:"/>
+                <ComboBox fx:id="actionField"/>
+            </HBox>
+        </VBox>
+
+    </content>
+
+    <!-- implicit <buttonTypes> ... <> section - use built-in setResultConverter on callback-->
+    <ButtonType text="OK" buttonData="OK_DONE"/>
+    <ButtonType text="Cancel" buttonData="CANCEL_CLOSE"/>
+</DialogPane>

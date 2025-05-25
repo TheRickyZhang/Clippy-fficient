@@ -3,14 +3,19 @@ package com.example.ui.app;
 import com.example.agent.GlobalHookService;
 import com.example.core.ShortcutEngine;
 import com.example.core.context.ApplicationContext;
+import com.example.core.utils.AppActionType;
+import com.example.core.utils.Suggestion;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 public class MainApp extends Application {
     private ApplicationContext context;
@@ -20,7 +25,7 @@ public class MainApp extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         context = new ApplicationContext(List.of());
-        engine = new ShortcutEngine();
+        engine = new ShortcutEngine(initUIListeners());
         hookService = new GlobalHookService(engine::onEvent);
 
         URL fxmlUrl = getClass().getResource("/com/example/ui/app/AppView.fxml");
@@ -56,9 +61,23 @@ public class MainApp extends Application {
 
     @Override
     public void stop() {
-       GlobalHookService.stop();
+        hookService.stop();
     }
+
     public static void main(String[] args) {
         launch(args);
+    }
+
+    private Map<AppActionType, Consumer<Suggestion>> initUIListeners() {
+        return Map.of(AppActionType.OPEN_POPUP,
+                (s) -> {
+                    var a = new Alert(Alert.AlertType.INFORMATION, s.getTip());
+                    a.showAndWait();
+                },
+                AppActionType.MAKE_SOUND,
+                (s) -> {
+                    System.out.println("Made sound" + s.getTip());
+                }
+        );
     }
 }

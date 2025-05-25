@@ -8,7 +8,7 @@ import com.example.ui.components.HeaderController;
 import com.example.ui.controllers.BaseController;
 import com.example.ui.controllers.LogController;
 import com.example.ui.controllers.ReferencesController;
-import com.example.ui.controllers.SuggestionsController;
+import com.example.ui.controllers.HomeController;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -38,15 +38,15 @@ public class AppController {
     private final Map<String, Parent> pageViews = new HashMap<>();
 
     // Will be set during preloadAllPages()
-    private SuggestionsController suggestionsController;
+    private HomeController suggestionsController;
     private ReferencesController  referencesController;
     private LogController         logController;
 
     /** One‐line description of each page: name, its FXML, its controller type, and how to stash it. */
     private static final List<PageDef<? extends BaseController>> PAGES = List.of(
-            new PageDef<>("Suggestions",
-                    "/com/example/ui/controllers/SuggestionsView.fxml",
-                    SuggestionsController.class,
+            new PageDef<>("Home",
+                    "/com/example/ui/controllers/HomeView.fxml",
+                    HomeController.class,
                     (app, ctrl) -> app.suggestionsController = ctrl
             ),
             new PageDef<>("References",
@@ -71,13 +71,10 @@ public class AppController {
         // Let the header buttons / search icon know how to talk back to us
         header.setAppController(this);
 
-        // 1) Load and cache ALL pages (even if user never visits them)
+        //Load and cache ALL pages (even if user never visits them)
         PAGES.forEach(this::preloadPage);
 
-        // 2) Wire up “global” search providers
         initSearch();
-
-        // 3) Show the first page
         showMainView();
     }
 
@@ -97,17 +94,16 @@ public class AppController {
             // cache the scene graph
             pageViews.put(page.name(), view);
         } catch (IOException ex) {
-            // If preload fails, show an alert (but keep the app running)
             Platform.runLater(() ->
                     new Alert(Alert.AlertType.ERROR,
                             "Failed to load “" + page.name() + "” view:\n" + ex.getMessage())
                             .showAndWait()
             );
-            ex.printStackTrace();
         }
     }
 
-    /** Registers each domain’s search‐provider; here we do “References → tokens”. */
+    // Set up search providers
+    // TODO: Set up for other pages
     private void initSearch() {
         SearchService svc = SearchService.get();
         svc.registerProvider("References", () ->
@@ -122,18 +118,15 @@ public class AppController {
                                 }))
                         .toList()
         );
-
-        // … you can add other providers for Suggestions, Log, etc.
     }
 
-    /** Switch‐view helpers: just grab the cached Parent and put it center. */
     public void showMainView()       { rootView.setCenter(pageViews.get("Suggestions")); }
     public void showReferencesView() { rootView.setCenter(pageViews.get("References")); }
     public void showLogView()        { rootView.setCenter(pageViews.get("Log")); }
 
     public ShortcutEngine getEngine() { return engine; }
 
-    /** Bundles the name ↔ FXML path ↔ controller class ↔ field‐setter into one record. */
+    // Bundles the name FXML path controller class field‐setter into one record.
     private record PageDef<T extends BaseController>(
             String name,
             String fxmlPath,

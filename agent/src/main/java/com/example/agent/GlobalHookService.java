@@ -53,7 +53,7 @@ public class GlobalHookService {
         running = true;
     }
 
-    public static void stop() throws RuntimeException {
+    public void stop() throws RuntimeException {
         if (!running) {
             log.warning("GlobalHookService has not started yet!");
             return;
