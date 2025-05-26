@@ -5,6 +5,8 @@ import com.example.core.events.KeyPressEvent;
 import com.example.core.events.KeyReleaseEvent;
 import com.example.core.events.KeyTypedEvent;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,25 +20,17 @@ public class InputSequence {
 
     private void resetState() {
         earliestTime = 0;
-        latestTime = Long.MAX_VALUE;
-        minKeys = 0;
-        maxKeys = Integer.MAX_VALUE;
-        currKeys = 0;
+        latestTime   = Long.MAX_VALUE;
+        minKeys      = 0;
+        maxKeys      = Integer.MAX_VALUE;
+        currKeys     = 0;
     }
-    // --------------------------------------------------------------
 
-    /*
-     * @Precondition: Call parse to make sure that this is valid.
-     *
-     * try {
-     *   var steps = DSLParser.parse(raw)
-     *   x = new InputSequence(steps)
-     * } catch ParserError e {
-     *    for (var c: corrections)
-     * }
-     */
     public InputSequence(List<SequenceElement> steps) {
-        this.steps = steps;
+        // reverse the pattern so rev.get(0) is the last original step
+        var rev = new ArrayList<>(steps);
+        Collections.reverse(rev);
+        this.steps = rev;
     }
 
     @Override
@@ -47,36 +41,35 @@ public class InputSequence {
     }
 
     public boolean matches(Deque<InputEvent> buf) {
+        // assume buf is newest→oldest
         InputEvent[] arr = buf.toArray(new InputEvent[0]);
         int n = arr.length;
         if (n == 0) return steps.isEmpty();
 
-//        System.out.println("Calling matches on " + Arrays.toString(arr));
-
-        // Immediately check for 1st match to not have one pattern trigger multiple actions
-        var first = steps.getFirst();
-        if (!matchesOne(arr[0], first)) return false;
+        // match the reversed-first step on the most recent event
+        if (!matchesOne(arr[0], steps.getFirst())) return false;
         int j = 1;
-        long prevTime = 0;
+        long prevTime = arr[0].timestamp();
         resetState();
 
-
+        // forward‐scan the rest of arr against reversed steps
         for (int i = 1; i < n && j < steps.size(); i++) {
             var step = steps.get(j);
-
             switch (step) {
                 case KeyPressAction(int nativeModifiers, int nativeKeyCode) -> {
                     for (int k = i; k < n; k++) {
-                        if ((maxKeys >= 0 && currKeys > maxKeys) || arr[k].timestamp() > latestTime)
+                        var e = arr[k];
+                        long ts = e.timestamp();
+                        if ((maxKeys >= 0 && currKeys > maxKeys) || ts > latestTime)
                             return false;
-                        if (currKeys < minKeys || arr[k].timestamp() < earliestTime)
+                        if (currKeys < minKeys || ts < earliestTime)
                             continue;
-                        if (arr[k] instanceof KeyPressEvent(int keyCode, int modifiers, long timestamp)
-                                && keyCode == nativeKeyCode
-                                && (modifiers & nativeModifiers) == nativeModifiers) {
+                        if (e instanceof KeyPressEvent(int code, int mods, long t)
+                                && code == nativeKeyCode
+                                && (mods & nativeModifiers) == nativeModifiers) {
                             i = k;
                             j++;
-                            prevTime = timestamp;
+                            prevTime = t;
                             resetState();
                             break;
                         }
@@ -84,16 +77,18 @@ public class InputSequence {
                 }
                 case KeyReleaseAction(int nativeModifiers, int nativeKeyCode) -> {
                     for (int k = i; k < n; k++) {
-                        if ((maxKeys >= 0 && currKeys > maxKeys) || arr[k].timestamp() > latestTime)
+                        var e = arr[k];
+                        long ts = e.timestamp();
+                        if ((maxKeys >= 0 && currKeys > maxKeys) || ts > latestTime)
                             return false;
-                        if (currKeys < minKeys || arr[k].timestamp() < earliestTime)
+                        if (currKeys < minKeys || ts < earliestTime)
                             continue;
-                        if (arr[k] instanceof KeyReleaseEvent(int keyCode, int modifiers, long timestamp)
-                                && keyCode == nativeKeyCode
-                                && (modifiers & nativeModifiers) == nativeModifiers) {
+                        if (e instanceof KeyReleaseEvent(int code, int mods, long t)
+                                && code == nativeKeyCode
+                                && (mods & nativeModifiers) == nativeModifiers) {
                             i = k;
                             j++;
-                            prevTime = timestamp;
+                            prevTime = t;
                             resetState();
                             break;
                         }
@@ -102,17 +97,16 @@ public class InputSequence {
                 case KeyTypedAction(char character) -> {
                     currKeys = 0;  // reset noise count
                     for (int k = i; k < n; k++) {
-                        InputEvent ev = arr[k];
-                        long ts = ev.timestamp();
-
+                        var e = arr[k];
+                        long ts = e.timestamp();
                         if (ts > latestTime)
                             return false;
-                        if (ev instanceof KeyTypedEvent ktNoise && ktNoise.keyChar() != character) {
+                        if (e instanceof KeyTypedEvent kt && kt.keyChar() != character) {
                             if (++currKeys > maxKeys)
                                 return false;
                             continue;
                         }
-                        if (ev instanceof KeyTypedEvent) {
+                        if (e instanceof KeyTypedEvent) {
                             if (ts < earliestTime)
                                 continue;
                             i = k;
@@ -130,8 +124,10 @@ public class InputSequence {
                     i--;
                 }
                 case PauseTimeInterval(int min, int max) -> {
-                    earliestTime = prevTime + min;
-                    latestTime = prevTime + max;
+                    // on reversed pattern, flip the time window:
+                    // next match must fall in [prevTime-max, prevTime-min]
+                    latestTime   = prevTime - min;
+                    earliestTime = prevTime - max;
                     j++;
                     i--;
                 }
@@ -155,5 +151,4 @@ public class InputSequence {
             default -> false;
         };
     }
-
 }

@@ -29,7 +29,7 @@ public class AppMouseListener implements NativeMouseInputListener {
                 e.getX(), e.getY(),
                 System.currentTimeMillis()
         ));
-        LogService.detailed().info("Mouse Button " + e.paramString() + " Clicked");
+        LogService.detailed().info(e.paramString());
         LogService.simple().info("Mouse Clicked");
     }
     @Override
@@ -39,7 +39,7 @@ public class AppMouseListener implements NativeMouseInputListener {
                 e.getX(), e.getY(),
                 System.currentTimeMillis()
         ));
-        LogService.detailed().info("Mouse Button " + e.paramString() + " Pressed");
+        LogService.detailed().info(e.paramString());
         LogService.simple().info("Mouse Pressed");
     }
     @Override
@@ -49,7 +49,7 @@ public class AppMouseListener implements NativeMouseInputListener {
                 e.getX(), e.getY(),
                 System.currentTimeMillis()
         ));
-        LogService.detailed().info("Mouse Button " + e.paramString() + " Released");
+        LogService.detailed().info(e.paramString());
         LogService.simple().info("Mouse Released");
     }
 

@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 // The main program engine that maps sequence patterns to actions maintains a buffer, and parses incoming input
 public class ShortcutEngine {
     private final ApplicationContext context;
-    private final EventBuffer buffer = new EventBuffer(10);
+    private final EventBuffer buffer = new EventBuffer(50);
     private final Map<InputSequence, Suggestion> suggestions = new HashMap<>();
     Map<AppAction,Consumer<Suggestion>> listeners;
 

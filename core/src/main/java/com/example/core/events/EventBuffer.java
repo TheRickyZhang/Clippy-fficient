@@ -11,8 +11,8 @@ public class EventBuffer {
     }
 
     public void push(InputEvent e) {
-        buf.addLast(e);
-        if(buf.size() > maxSize) buf.removeFirst();
+        buf.addFirst(e);
+        if(buf.size() > maxSize) buf.removeLast();
     }
 
     public Deque<InputEvent> snapshot() {
