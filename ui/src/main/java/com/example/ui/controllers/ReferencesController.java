@@ -11,75 +11,74 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 
-import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class ReferencesController extends BaseController {
     @FXML
-    private TableView<RefItem> tableView;
+    private TableView<Map.Entry<String, Integer>> tableView;
     @FXML
-    private TableColumn<RefItem, String> tokenCol;
+    private TableColumn<Map.Entry<String, Integer>, String> tokenCol;
     @FXML
-    private TableColumn<RefItem, String> propsCol;
+    private TableColumn<Map.Entry<String, Integer>, String> propsCol;
     @FXML
     private TextField filterReferences;
 
-    // RefItem = .token | {.props[0], .props[1], ... }
-    public record RefItem(String token, List<String> props) {
-        public String getJoinedProps() {
-            return String.join(", ", props);
-        }
-    }
-
     @FXML
     public void initialize() {
-        ObservableList<RefItem> data = FXCollections.observableArrayList(TokenRegistry.getTokenMapValues().stream()
-                .map(e -> new RefItem(e.getKey(), e.getValue()))
-                .toList());
+        // Assume TokenRegistry.getTokenMapValues() now returns List<Map.Entry<String,Integer>>
+        ObservableList<Map.Entry<String, Integer>> data = FXCollections
+                .observableArrayList(TokenRegistry.getTokenMapValues());
 
-        // Filtered list for searching, initially show everything
-        FilteredList<RefItem> filtered = new FilteredList<>(data, p -> true);
+        // wrap in a FilteredList (initial predicate = true, show all)
+        FilteredList<Map.Entry<String, Integer>> filtered = new FilteredList<>(data, e -> true);
 
-        filterReferences.textProperty().addListener((observable, oldValue, newValue) -> filtered.setPredicate(refItem -> {
-            if (newValue == null || newValue.isEmpty()) return true;
-            String lowercaseFilter = newValue.toLowerCase(Locale.ROOT);
-            return (refItem.token.toLowerCase(Locale.ROOT).contains(lowercaseFilter)
-                    || refItem.getJoinedProps().toLowerCase(Locale.ROOT).contains(lowercaseFilter));
-        }));
+        // listen for text changes in filterReferences
+        filterReferences.textProperty().addListener((obs, oldVal, newVal) -> {
+            String lc = (newVal == null ? "" : newVal.toLowerCase(Locale.ROOT));
+            filtered.setPredicate(entry -> {
+                if (lc.isEmpty()) return true;
+                // match on key or value
+                if (entry.getKey().toLowerCase(Locale.ROOT).contains(lc)) return true;
+                return entry.getValue()
+                        .toString()
+                        .toLowerCase(Locale.ROOT)
+                        .contains(lc);
+            });
+        });
 
-        // To re-enable column sorting
-        SortedList<RefItem> sorted = new SortedList<>(filtered);
+        // preserve sort order when filtering
+        SortedList<Map.Entry<String, Integer>> sorted = new SortedList<>(filtered);
         sorted.comparatorProperty().bind(tableView.comparatorProperty());
         tableView.setItems(sorted);
 
+        // column for the map key
         tokenCol.setCellValueFactory(cell ->
-                new ReadOnlyStringWrapper(cell.getValue().token())
+                new ReadOnlyStringWrapper(cell.getValue().getKey())
         );
-
+        // column for the map value (as String)
         propsCol.setCellValueFactory(cell ->
-                new ReadOnlyStringWrapper(cell.getValue().getJoinedProps())
+                new ReadOnlyStringWrapper(cell.getValue().getValue().toString())
         );
+        tokenCol.setSortType(TableColumn.SortType.ASCENDING);
+        tableView.getSortOrder().add(tokenCol);
+        tableView.sort();
     }
-
 
     /**
      * Call this when someone “search-activated” a token.
      */
     public void selectToken(String token) {
-        // show the page (if you weren’t already on it)
         app.showReferencesView();
-
-        // put the token text into the filter box (this will re-filter the table)
         filterReferences.setText(token);
 
-        // then highlight it in the table
+        // highlight the matching entry by key
         tableView.getItems().stream()
-                .filter(item -> item.token().equals(token))
+                .filter(e -> e.getKey().equals(token))
                 .findFirst()
                 .ifPresent(item -> {
                     tableView.getSelectionModel().select(item);
                     tableView.scrollTo(item);
                 });
     }
-
 }

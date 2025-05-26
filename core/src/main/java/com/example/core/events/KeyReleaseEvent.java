@@ -4,4 +4,4 @@ public record KeyReleaseEvent(
         int keyCode,
         int modifiers,
         long timestamp
-) implements InputEvent {}
+) implements InputEvent, KeyEvent {}

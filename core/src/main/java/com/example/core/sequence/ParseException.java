@@ -7,4 +7,8 @@ public class ParseException extends Exception {
     public ParseException(List<String> messages) {
         this.messages = messages;
     }
+    @Override
+    public String toString () {
+        return String.join("", messages);
+    }
 }

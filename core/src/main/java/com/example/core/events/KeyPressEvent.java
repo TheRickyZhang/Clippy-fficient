@@ -4,4 +4,4 @@ public record KeyPressEvent(
         int keyCode,
         int modifiers,
         long timestamp
-) implements InputEvent {}
+) implements InputEvent, KeyEvent {}

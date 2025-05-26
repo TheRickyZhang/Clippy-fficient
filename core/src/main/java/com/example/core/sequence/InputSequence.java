@@ -12,6 +12,19 @@ import java.util.stream.Collectors;
 public class InputSequence {
     private final List<SequenceElement> steps;
 
+    private long earliestTime;
+    private long latestTime;
+    private int minKeys, maxKeys, currKeys;
+
+    private void resetState() {
+        earliestTime = 0;
+        latestTime = Long.MAX_VALUE;
+        minKeys = 0;
+        maxKeys = Integer.MAX_VALUE;
+        currKeys = 0;
+    }
+    // --------------------------------------------------------------
+
     /*
      * @Precondition: Call parse to make sure that this is valid.
      *
@@ -26,83 +39,86 @@ public class InputSequence {
         this.steps = steps;
     }
 
+    @Override
     public String toString() {
-        return steps.stream().map(SequenceElement::toString).collect(Collectors.joining());
+        return steps.stream()
+                .map(SequenceElement::toString)
+                .collect(Collectors.joining());
     }
 
     public boolean matches(Deque<InputEvent> buf) {
-        if (buf.size() < steps.size()) return false;
         InputEvent[] arr = buf.toArray(new InputEvent[0]);
         int n = arr.length;
+        if (n == 0) return steps.isEmpty();
 
-        int j = 0;
-        long prevTime = 0, earliestTime = 0, latestTime = Long.MAX_VALUE;
-        int minKeys = 0, maxKeys = -1, currKeys = 0;
+//        System.out.println("Calling matches on " + Arrays.toString(arr));
 
-        for (int i = 0; i < n && j < steps.size(); i++) {
+        // Immediately check for 1st match to not have one pattern trigger multiple actions
+        var first = steps.getFirst();
+        if (!matchesOne(arr[0], first)) return false;
+        int j = 1;
+        long prevTime = 0;
+        resetState();
+
+
+        for (int i = 1; i < n && j < steps.size(); i++) {
             var step = steps.get(j);
 
             switch (step) {
                 case KeyPressAction(int nativeModifiers, int nativeKeyCode) -> {
                     for (int k = i; k < n; k++) {
-                        if ((maxKeys >= 0 && currKeys > maxKeys) || arr[k].timestamp() > latestTime) return false;
-                        if (k > 0 && arr[k] instanceof KeyPressEvent ek
-                                && arr[k - 1] instanceof KeyPressEvent pk
-                                && ek.keyCode() != pk.keyCode()) {
-                            currKeys++;
-                        }
-                        if (currKeys < minKeys || arr[k].timestamp() < earliestTime) continue;
+                        if ((maxKeys >= 0 && currKeys > maxKeys) || arr[k].timestamp() > latestTime)
+                            return false;
+                        if (currKeys < minKeys || arr[k].timestamp() < earliestTime)
+                            continue;
                         if (arr[k] instanceof KeyPressEvent(int keyCode, int modifiers, long timestamp)
                                 && keyCode == nativeKeyCode
                                 && (modifiers & nativeModifiers) == nativeModifiers) {
                             i = k;
                             j++;
                             prevTime = timestamp;
-                            earliestTime = 0;
-                            latestTime = Long.MAX_VALUE;
-                            minKeys = 0;
-                            maxKeys = -1;
-                            currKeys = 0;
+                            resetState();
                             break;
                         }
                     }
                 }
                 case KeyReleaseAction(int nativeModifiers, int nativeKeyCode) -> {
                     for (int k = i; k < n; k++) {
-                        if ((maxKeys >= 0 && currKeys > maxKeys) || arr[k].timestamp() > latestTime) return false;
-                        if (k > 0 && arr[k] instanceof KeyReleaseEvent ek
-                                && arr[k - 1] instanceof KeyReleaseEvent pk
-                                && ek.keyCode() != pk.keyCode()) {
-                            currKeys++;
-                        }
-                        if (currKeys < minKeys || arr[k].timestamp() < earliestTime) continue;
+                        if ((maxKeys >= 0 && currKeys > maxKeys) || arr[k].timestamp() > latestTime)
+                            return false;
+                        if (currKeys < minKeys || arr[k].timestamp() < earliestTime)
+                            continue;
                         if (arr[k] instanceof KeyReleaseEvent(int keyCode, int modifiers, long timestamp)
                                 && keyCode == nativeKeyCode
                                 && (modifiers & nativeModifiers) == nativeModifiers) {
                             i = k;
                             j++;
                             prevTime = timestamp;
-                            earliestTime = 0;
-                            latestTime = Long.MAX_VALUE;
-                            minKeys = 0;
-                            maxKeys = -1;
-                            currKeys = 0;
+                            resetState();
                             break;
                         }
                     }
                 }
                 case KeyTypedAction(char character) -> {
+                    currKeys = 0;  // reset noise count
                     for (int k = i; k < n; k++) {
-                        if (arr[k].timestamp() > latestTime) return false;
-                        if (arr[k] instanceof KeyTypedEvent kt && kt.keyChar() == character) {
+                        InputEvent ev = arr[k];
+                        long ts = ev.timestamp();
+
+                        if (ts > latestTime)
+                            return false;
+                        if (ev instanceof KeyTypedEvent ktNoise && ktNoise.keyChar() != character) {
+                            if (++currKeys > maxKeys)
+                                return false;
+                            continue;
+                        }
+                        if (ev instanceof KeyTypedEvent) {
+                            if (ts < earliestTime)
+                                continue;
                             i = k;
                             j++;
-                            prevTime = kt.timestamp();
-                            earliestTime = 0;
-                            latestTime = Long.MAX_VALUE;
-                            minKeys = 0;
-                            maxKeys = -1;
-                            currKeys = 0;
+                            prevTime = ts;
+                            resetState();
                             break;
                         }
                     }
@@ -119,9 +135,25 @@ public class InputSequence {
                     j++;
                     i--;
                 }
-                case null, default -> throw new IllegalStateException("Unexpected step type");
+                default -> throw new IllegalStateException("Unexpected step type");
             }
         }
+
         return j == steps.size();
     }
+
+    private boolean matchesOne(InputEvent ev, SequenceElement step) {
+        return switch (step) {
+            case KeyPressAction(int mods, int key) -> ev instanceof KeyPressEvent kpe
+                    && kpe.keyCode() == key
+                    && (kpe.modifiers() & mods) == mods;
+            case KeyReleaseAction(int mods, int key) -> ev instanceof KeyReleaseEvent kre
+                    && kre.keyCode() == key
+                    && (kre.modifiers() & mods) == mods;
+            case KeyTypedAction(char c) -> ev instanceof KeyTypedEvent kte
+                    && kte.keyChar() == c;
+            default -> false;
+        };
+    }
+
 }

@@ -5,4 +5,4 @@ public record KeyTypedEvent(
         char keyChar,
         int modifiers,
         long timestamp
-) implements InputEvent {}
+) implements InputEvent { }
