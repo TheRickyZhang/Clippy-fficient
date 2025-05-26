@@ -41,7 +41,7 @@ public class AppKeyListener implements NativeKeyListener {
     @Override
     public void nativeKeyTyped(NativeKeyEvent e) {
         // only typed events carry a real char, but we can still forward code+mods
-        handler.accept(new KeyTypedEvent(e.getKeyChar(), e.getKeyCode(), e.getModifiers(), System.currentTimeMillis()));
+        handler.accept(new KeyTypedEvent(e.getKeyChar(), e.getModifiers(), System.currentTimeMillis()));
         LogService.detailed().info("Key " + e.getKeyChar() + " Typed");
         LogService.simple().info(String.valueOf(e.getKeyChar()));
     }

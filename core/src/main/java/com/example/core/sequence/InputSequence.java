@@ -1,77 +1,127 @@
 package com.example.core.sequence;
 
 import com.example.core.events.InputEvent;
-import com.example.core.tokens.TokenRegistry;
-import com.example.core.utils.Pair;
+import com.example.core.events.KeyPressEvent;
+import com.example.core.events.KeyReleaseEvent;
+import com.example.core.events.KeyTypedEvent;
 
-import java.util.*;
-import java.util.function.Predicate;
+import java.util.Deque;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class InputSequence {
-    private final List<Predicate<InputEvent>> steps;
-    private final List<String> tokens;
+    private final List<SequenceElement> steps;
 
     /*
      * @Precondition: Call parse to make sure that this is valid.
      *
-     * tokens = toTokenList(raw)
-     * var corrections = parse(tokens);
-     * if(corrections.empty()) x = new InputSequence(tokens);
-     * else for(var c : corrections) ...
+     * try {
+     *   var steps = DSLParser.parse(raw)
+     *   x = new InputSequence(steps)
+     * } catch ParserError e {
+     *    for (var c: corrections)
+     * }
      */
-    public InputSequence(List<String> tokens) {
-        this.tokens = tokens;
-        this.steps = tokens.stream().map(TokenRegistry.TOKEN_MAP::get).toList();
-    }
-
-    @Override public boolean equals(Object o) {
-        if(this == o) return true;
-        if(!(o instanceof InputSequence other)) return false;
-        return tokens.equals(other.tokens);
-    }
-
-    public static List<String> toTokenList(String raw) {
-        return Arrays.stream(raw.split(">")).map(String::trim).filter(s -> !s.isEmpty()).toList();
-    }
-
-    /*
-     * Returns a list of {invalid token, potential correct token}.
-     */
-    public static List<Pair<String, Optional<String>>> parse(List<String> tokens) {
-        List<Pair<String, Optional<String>>> errors = new ArrayList<>();
-        for (String s : tokens) {
-            if (!TokenRegistry.TOKEN_MAP.containsKey(s)) {
-                errors.add(new Pair<>(s, Optional.empty()));
-            }
-        }
-        return errors;
-    }
-
-    public static String getErrorString(List<Pair<String, Optional<String>>> errors) {
-        StringBuilder msg = new StringBuilder();
-        for (Pair<String, Optional<String>> err : errors) {
-            msg.append("“").append(err.first()).append("” not recognized");
-            if(err.second().isPresent()) {
-                msg.append(" (did you mean “").append(err.second().get()).append("”)");
-            }
-            msg.append("\n");
-        }
-        return msg.toString();
+    public InputSequence(List<SequenceElement> steps) {
+        this.steps = steps;
     }
 
     public String toString() {
-        return String.join(" > ", tokens);
+        return steps.stream().map(SequenceElement::toString).collect(Collectors.joining());
     }
 
     public boolean matches(Deque<InputEvent> buf) {
         if (buf.size() < steps.size()) return false;
         InputEvent[] arr = buf.toArray(new InputEvent[0]);
-        int start = buf.size() - steps.size();
-        for (int i = 0; i < steps.size(); i++) {
-            Predicate<InputEvent> p = steps.get(i);
-            if (!p.test(arr[start + i])) return false;
-        }
-        return true;
-    }
+        int n = arr.length;
 
+        int j = 0;
+        long prevTime = 0, earliestTime = 0, latestTime = Long.MAX_VALUE;
+        int minKeys = 0, maxKeys = -1, currKeys = 0;
+
+        for (int i = 0; i < n && j < steps.size(); i++) {
+            var step = steps.get(j);
+
+            switch (step) {
+                case KeyPressAction(int nativeModifiers, int nativeKeyCode) -> {
+                    for (int k = i; k < n; k++) {
+                        if ((maxKeys >= 0 && currKeys > maxKeys) || arr[k].timestamp() > latestTime) return false;
+                        if (k > 0 && arr[k] instanceof KeyPressEvent ek
+                                && arr[k - 1] instanceof KeyPressEvent pk
+                                && ek.keyCode() != pk.keyCode()) {
+                            currKeys++;
+                        }
+                        if (currKeys < minKeys || arr[k].timestamp() < earliestTime) continue;
+                        if (arr[k] instanceof KeyPressEvent(int keyCode, int modifiers, long timestamp)
+                                && keyCode == nativeKeyCode
+                                && (modifiers & nativeModifiers) == nativeModifiers) {
+                            i = k;
+                            j++;
+                            prevTime = timestamp;
+                            earliestTime = 0;
+                            latestTime = Long.MAX_VALUE;
+                            minKeys = 0;
+                            maxKeys = -1;
+                            currKeys = 0;
+                            break;
+                        }
+                    }
+                }
+                case KeyReleaseAction(int nativeModifiers, int nativeKeyCode) -> {
+                    for (int k = i; k < n; k++) {
+                        if ((maxKeys >= 0 && currKeys > maxKeys) || arr[k].timestamp() > latestTime) return false;
+                        if (k > 0 && arr[k] instanceof KeyReleaseEvent ek
+                                && arr[k - 1] instanceof KeyReleaseEvent pk
+                                && ek.keyCode() != pk.keyCode()) {
+                            currKeys++;
+                        }
+                        if (currKeys < minKeys || arr[k].timestamp() < earliestTime) continue;
+                        if (arr[k] instanceof KeyReleaseEvent(int keyCode, int modifiers, long timestamp)
+                                && keyCode == nativeKeyCode
+                                && (modifiers & nativeModifiers) == nativeModifiers) {
+                            i = k;
+                            j++;
+                            prevTime = timestamp;
+                            earliestTime = 0;
+                            latestTime = Long.MAX_VALUE;
+                            minKeys = 0;
+                            maxKeys = -1;
+                            currKeys = 0;
+                            break;
+                        }
+                    }
+                }
+                case KeyTypedAction(char character) -> {
+                    for (int k = i; k < n; k++) {
+                        if (arr[k].timestamp() > latestTime) return false;
+                        if (arr[k] instanceof KeyTypedEvent kt && kt.keyChar() == character) {
+                            i = k;
+                            j++;
+                            prevTime = kt.timestamp();
+                            earliestTime = 0;
+                            latestTime = Long.MAX_VALUE;
+                            minKeys = 0;
+                            maxKeys = -1;
+                            currKeys = 0;
+                            break;
+                        }
+                    }
+                }
+                case PauseKeyInterval(int min, int max) -> {
+                    minKeys = min;
+                    maxKeys = max;
+                    j++;
+                    i--;
+                }
+                case PauseTimeInterval(int min, int max) -> {
+                    earliestTime = prevTime + min;
+                    latestTime = prevTime + max;
+                    j++;
+                    i--;
+                }
+                case null, default -> throw new IllegalStateException("Unexpected step type");
+            }
+        }
+        return j == steps.size();
+    }
 }

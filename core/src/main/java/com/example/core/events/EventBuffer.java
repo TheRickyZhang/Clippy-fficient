@@ -1,6 +1,4 @@
-package com.example.core.sequence;
-
-import com.example.core.events.InputEvent;
+package com.example.core.events;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

@@ -1,6 +1,9 @@
 package com.example.ui.controllers;
 
+import com.example.core.sequence.DSLParser;
 import com.example.core.sequence.InputSequence;
+import com.example.core.sequence.ParseException;
+import com.example.core.sequence.SequenceElement;
 import com.example.core.utils.AppAction;
 import com.example.core.utils.Pair;
 import com.example.core.utils.Suggestion;
@@ -58,6 +61,12 @@ public class HomeController extends BaseController {
         sequenceCol.setCellFactory(TextFieldTableCell.forTableColumn());
         sequenceCol.setOnEditCommit(e -> {
             Suggestion s = e.getRowValue();
+            try {
+               List<SequenceElement> steps = DSLParser.parse(e.getNewValue());
+
+            } catch (ParseException ex) {
+
+            }
             List<String> tokens = InputSequence.toTokenList(e.getNewValue());
             List<Pair<String, Optional<String>>> errors = InputSequence.parse(tokens);
             if (errors.isEmpty()) {
