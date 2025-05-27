@@ -3,6 +3,7 @@ package com.example.server.service;
 
 import com.example.server.model.User;
 import com.example.server.repository.UserRepository;
+import com.example.server.security.JwtTokenProvider;
 import com.example.shared.LoginRequest;
 import com.example.shared.TokenResponse;
 import org.springframework.security.crypto.password.PasswordEncoder;

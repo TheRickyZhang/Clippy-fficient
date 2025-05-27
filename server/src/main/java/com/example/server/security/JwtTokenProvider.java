@@ -1,20 +1,20 @@
-// src/main/java/com/example/server/JwtTokenProvider.java
+package com.example.server.security;
 
+import com.example.shared.Env;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.stereotype.Component;
+
 import java.util.Date;
 
 @Component
 public class JwtTokenProvider {
-    AppConfig
-    private final String secret = ???:?;
-    // e.g. never expire / 10 years:
-    private final long validityMs = 10L * 365 * 24 * 60 * 60 * 1000;
+    private final String secret     = Env.get("jwt.secret");
+    private final long   validityMs = Long.parseLong(Env.get("jwt.validityMs"));
 
     public String createToken(long userId) {
-        Date now = new Date();
-        Date exp = new Date(now.getTime() + validityMs);
+        var now = new Date();
+        var exp = new Date(now.getTime() + validityMs);
         return Jwts.builder()
                 .setSubject(Long.toString(userId))
                 .setIssuedAt(now)

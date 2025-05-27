@@ -1,4 +1,4 @@
-package com.example.config;
+package com.example.shared;
 
 import java.util.Properties;
 

@@ -3,9 +3,11 @@ package com.example.server.controller;
 import com.example.server.model.User;
 import com.example.server.service.UserService;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -16,10 +18,12 @@ public class UserController {
         this.service = service;
     }
 
-    @PostMapping()
-    public User create(@RequestParam String name, @RequestParam String email, @RequestParam String password) {
-        return service.create(name, email, password);
+    @PostMapping
+    public User create(@RequestBody Map<String,String> payload) {
+        return service.create(
+                payload.get("name"),
+                payload.get("email"),
+                payload.get("password")
+        );
     }
-
-    @
 }

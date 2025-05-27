@@ -1,7 +1,7 @@
 package com.example.ui.api;
 
-import com.example.config.Env;
 import com.example.core.logging.LogService;
+import com.example.shared.Env;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.net.URI;

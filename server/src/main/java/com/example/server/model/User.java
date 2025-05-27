@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.*;
 
+
+// TODO: Add Lombok
+
 @Entity
 @Table(
         name = "users",
@@ -68,6 +71,14 @@ public class User {
     public void addSuggestion(Suggestion s) {
         suggestions.add(s);
         s.setUser(this);
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public long getId() {
+        return id;
     }
 
     // getters / setters if you need them
