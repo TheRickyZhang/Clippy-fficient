@@ -1,0 +1,26 @@
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.ui.controllers.SigninController"
+      spacing="10" alignment="CENTER" >
+
+    <Label fx:id="titleLabel" style="-fx-font-size: 16px;"/>
+
+    <TextField fx:id="emailField" promptText="Email"/>
+    <PasswordField fx:id="passwordField" promptText="Password"/>
+
+    <!-- Only for Sign-Up -->
+    <VBox fx:id="extraFields" spacing="10" managed="false" visible="false">
+        <TextField fx:id="nameField"         promptText="Full Name"/>
+        <TextField fx:id="confirmEmailField" promptText="Confirm Email"/>
+    </VBox>
+
+    <!-- Buttons -->
+    <HBox alignment="CENTER">
+        <Button fx:id="submitButton"   onAction="#onSubmit"/>
+        <Button fx:id="toggleButton"   onAction="#onToggleMode"/>
+    </HBox>
+
+</VBox>

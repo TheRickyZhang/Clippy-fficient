@@ -5,10 +5,9 @@ import com.example.core.search.SearchEntry;
 import com.example.core.search.SearchService;
 import com.example.core.tokens.TokenRegistry;
 import com.example.ui.components.HeaderController;
-import com.example.ui.controllers.BaseController;
-import com.example.ui.controllers.HomeController;
-import com.example.ui.controllers.LogController;
-import com.example.ui.controllers.ReferencesController;
+import com.example.ui.controllers.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -35,9 +34,14 @@ public class AppController {
     // Stores each page’s scene graph so we don’t reload FXML on every switch
     private final Map<Page, Parent> pageViews = new EnumMap<>(Page.class);
 
+    // Properties
+    private final BooleanProperty signedIn = new SimpleBooleanProperty(false);
+
+    // Controllers
     HomeController homeController;
     ReferencesController referencesController;
     LogController logController;
+    SigninController signinController;
 
     public AppController(ShortcutEngine engine) {
         this.engine = engine;
@@ -54,6 +58,8 @@ public class AppController {
         //Load and cache ALL pages (even if user never visits them)
         preloadAllPages();
         showPage(Page.SUGGESTIONS);
+
+        header.signedInProperty().bind(signedInProperty());
 
         initSearch();
     }
@@ -84,6 +90,7 @@ public class AppController {
             } catch (IOException e) {
                 new Alert(Alert.AlertType.ERROR, "Failed to load “" + p + "”: " + e.getMessage())
                         .showAndWait();
+                e.printStackTrace();
             }
         }
     }
@@ -116,8 +123,22 @@ public class AppController {
         );
     }
 
+    // Properties
+    public BooleanProperty signedInProperty() {
+        return signedIn;
+    }
+    public void markSignedIn() {
+        signedIn.set(true);
+        showPage(Page.SUGGESTIONS);
+    }
+    public void markSignedOut() {
+        signedIn.set(false);
+        showPage(Page.SIGNIN);
+    }
+
+    // Controllers
     public void showMainView()       { showPage(Page.SUGGESTIONS); }
     public void showReferencesView() { showPage(Page.REFERENCES); }
     public void showLogView()        { showPage(Page.LOG); }
-
+    public void showSigninView()     { showPage(Page.SIGNIN); }
 }

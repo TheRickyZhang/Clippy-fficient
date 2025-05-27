@@ -1,4 +1,4 @@
-package com.example.core.utils;
+package com.example.shared;
 
 public enum AppAction {
     OPEN_POPUP,

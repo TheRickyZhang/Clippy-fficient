@@ -2,6 +2,7 @@
 
 <!--Basically extends ToolBar class-->
 <?import com.example.ui.search.SearchDialog?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.Region?>
 <fx:root type="javafx.scene.control.ToolBar"
@@ -15,9 +16,11 @@
     <Button text="References" onAction="#onShowReferences"/>
     <Button text="Log" onAction="#onShowLog"/>
 
-    <Region/>
-    <Label text="Search: "/>
+    <Region HBox.hgrow="ALWAYS"/>
+
     <Button text="🔍" onAction="#onSearchOpen"/>
+
+    <Button fx:id="authButton"/>
 </fx:root>
 
 

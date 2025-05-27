@@ -1,2 +1,4 @@
 rootProject.name = 'Clippefficiency'
-include 'agent', 'core', 'ui', 'server'
+include 'shared', 'agent', 'core', 'ui', 'server', 'config'
+include 'security'
+include 'config'

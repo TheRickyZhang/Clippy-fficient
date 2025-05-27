@@ -1,11 +1,11 @@
 package com.example.core;
 
 import com.example.core.context.ApplicationContext;
-import com.example.core.events.InputEvent;
 import com.example.core.events.EventBuffer;
+import com.example.core.events.InputEvent;
 import com.example.core.sequence.InputSequence;
-import com.example.core.utils.AppAction;
 import com.example.core.utils.Suggestion;
+import com.example.shared.AppAction;
 
 import java.util.*;
 import java.util.function.Consumer;

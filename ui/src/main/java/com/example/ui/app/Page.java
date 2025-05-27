@@ -1,9 +1,6 @@
 package com.example.ui.app;
 
-import com.example.ui.controllers.BaseController;
-import com.example.ui.controllers.HomeController;
-import com.example.ui.controllers.LogController;
-import com.example.ui.controllers.ReferencesController;
+import com.example.ui.controllers.*;
 
 import java.util.function.BiConsumer;
 
@@ -22,6 +19,11 @@ public enum Page {
             "LogView.fxml",
             LogController.class,
             (app, ctrl) -> app.logController = (LogController) ctrl
+    ),
+    SIGNIN(
+            "SigninView.fxml",
+            SigninController.class,
+            (app, ctrl) -> app.signinController = (SigninController) ctrl
     );
 
     private final String fxmlPath;

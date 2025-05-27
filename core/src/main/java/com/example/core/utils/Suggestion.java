@@ -1,6 +1,7 @@
 package com.example.core.utils;
 
 import com.example.core.sequence.InputSequence;
+import com.example.shared.AppAction;
 
 /**
  * Core only knows: sequence → hint → actionType

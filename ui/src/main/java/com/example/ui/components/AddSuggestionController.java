@@ -1,9 +1,12 @@
 package com.example.ui.components;
 
-import com.example.core.utils.AppAction;
+import com.example.shared.AppAction;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 
 public class AddSuggestionController {
     @FXML public Label   errorLabel;
